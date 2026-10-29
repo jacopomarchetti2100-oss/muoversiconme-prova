@@ -103,6 +103,7 @@
     .intro .testo-grande { font-family: var(--font); font-weight: 300; font-size: clamp(1.7rem, 3.4vw, 2.8rem);
       line-height: 1.05; letter-spacing: -0.02em; max-width: 26ch; margin: 140px auto 0; }
     .intro .testo-grande em { color: var(--bianco); }   /* sul verde il verde non si leggerebbe: parole chiave in bianco */
+    @media (max-width: 600px) { .intro .testo-grande { font-size: 1.45rem; padding-inline: 14px; } }   /* telefoni: testo del riquadro verde un po' più piccolo */
     .intro .link { display: inline-block; margin-top: 56px; font-size: 1rem; text-decoration: none; font-weight: 400; }
     .intro .link:hover { text-decoration: underline; }
 
