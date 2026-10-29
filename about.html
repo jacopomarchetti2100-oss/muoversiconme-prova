@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">   <!-- versione di prova: non compare su Google -->
+  <title>About me | Muoversi con Me</title>
+  <meta name="description" content="[Chi sono e come lavoro: 150 caratteri per Google.]">
+
+  <!-- Font Pulpo da Adobe Fonts (stesso kit della home) -->
+  <link rel="stylesheet" href="https://use.typekit.net/axg5mfx.css">
+
+  <style>
+    /* ====== FONT DEL BRAND: Factor A Light (cartella fonts/) + Pulpo (Adobe Fonts) ====== */
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorALight-Regular.ttf") format("truetype"); font-weight: 300; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorA-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorAMedium-Regular.ttf") format("truetype"); font-weight: 500 700; font-display: swap; }
+
+    /* ====== COLORI: pagina scura con il blu-nero del logo ====== */
+    :root {
+      --colore-principale: #74cb1a;   /* verde del logo */
+      --sfondo: #1b252e;              /* blu-nero del logo */
+      --testo: #eef1ec;
+      --tenue: rgba(238, 241, 236, .62);
+      --linea: rgba(238, 241, 236, .14);
+      --pulsante: #2b3742;
+      --font: "Factor A", "Helvetica Neue", Arial, sans-serif;
+      --font-titoli: "pulpo", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); font-weight: 300; font-size: 1.1rem; line-height: 1.5; color: var(--testo); background: var(--sfondo); overflow-x: clip; }
+    /* griglia di sfondo (come Progetto Autonomia), ferma mentre scorri e sfumata verso i bordi */
+    body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 72px 72px; background-position: center top;
+      -webkit-mask-image: radial-gradient(ellipse 70% 75% at 50% 50%, #000 25%, transparent 100%);
+      mask-image: radial-gradient(ellipse 70% 75% at 50% 50%, #000 25%, transparent 100%); }
+    @media (max-width: 800px) { body::before { background-size: 48px 48px; } }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; }
+    em { font-family: var(--font-titoli); font-weight: 300; color: var(--colore-principale); }
+    .contenitore { width: min(1100px, 100% - 32px); margin-inline: auto; }
+
+    /* Segnaposto: evidenzia i testi da sostituire (togli questa regola alla fine) */
+    .da-compilare { background: rgba(255, 243, 196, .16); border-radius: 4px; padding: 0 4px; }
+
+    /* ====== BARRA IN ALTO ====== */
+    header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center;
+      justify-content: space-between; padding: 18px 24px; pointer-events: none; }
+    header > * { pointer-events: auto; }
+    .logo img { height: 56px; width: auto; transition: opacity .3s; }
+    .orologio { font-size: .9rem; letter-spacing: .06em; font-weight: 400; color: var(--colore-principale); transition: opacity .3s; }
+    body.scorso .logo img, body.scorso .orologio { opacity: 0; pointer-events: none; }
+
+    /* ====== MENU A PULSANTI IN BASSO ====== */
+    .barra { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 4px; align-items: center; list-style: none; }
+    .barra a { display: block; padding: 10px 18px; border-radius: 4px; background: var(--pulsante); color: var(--testo);
+      font: 400 .9rem var(--font); text-decoration: none; white-space: nowrap; transition: background .2s, color .2s; }
+    .barra a:hover, .barra a.attivo { background: var(--colore-principale); color: var(--sfondo); }
+    .barra .su { width: 40px; height: 40px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
+
+    /* ====== 1. ABOUT ME. ====== */
+    .storia { padding: 200px 0 110px; }
+    .storia h1 { text-align: center; white-space: nowrap; margin-bottom: 72px;
+      font-family: var(--font); font-weight: 300; font-size: clamp(3.2rem, 9vw, 7.5rem); line-height: 1; letter-spacing: -0.02em;
+      animation: sali 1s cubic-bezier(.2,.7,.2,1) both; }
+    /* Logo "Me." (LOGO NEG.png): solo l'altezza è fissata, la larghezza segue le proporzioni originali */
+    .storia h1 img { display: inline-block; vertical-align: baseline; height: .78em; width: auto; margin: 0 0 -.02em .18em; }   /* il fondo di "Me." poggia sulla stessa riga di "About" */
+    .racconto { max-width: 620px; margin-inline: auto; display: grid; gap: 24px; font-size: 1.2rem; }
+    .evidenza { color: var(--colore-principale); font-weight: 400; }
+
+    /* ====== 2. BANNER REEL INSTAGRAM (scorre da solo in loop, si può trascinare) ====== */
+    .reel-banner { overflow-x: auto; scrollbar-width: none; cursor: grab; padding: 10px 0 20px; }
+    .reel-banner::-webkit-scrollbar { display: none; }
+    .reel-banner.trascina { cursor: grabbing; }
+    .reel-traccia { display: flex; gap: 14px; width: max-content; padding: 0 7px; }
+    .reel { position: relative; display: block; width: clamp(170px, 17vw, 250px); aspect-ratio: 9 / 16; border-radius: 6px; overflow: hidden;
+      background: var(--pulsante); flex: none; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+    .reel img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; }
+    .reel::after { content: ""; position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(27, 37, 46, .65) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5v14l11-7z' fill='%23fff'/%3E%3C/svg%3E") center / 16px no-repeat; }
+    .reel:hover { transform: translateY(-8px); }
+    .reel-firma { text-align: center; margin-top: 18px; font-size: .95rem; }
+    .reel-firma a { color: var(--colore-principale); text-decoration: none; font-weight: 400; }
+    .reel-firma a:hover { text-decoration: underline; }
+
+    /* ====== 3. MISSIONE + PULSANTE ====== */
+    .missione { padding: 130px 0 140px; text-align: center; }
+    .missione h2 { font-family: var(--font-titoli); font-weight: 300; font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1; margin-bottom: 28px; }
+    .missione p { max-width: 560px; margin-inline: auto; font-size: 1.2rem; }
+    .missione .bottone { margin-top: 44px; }
+
+    /* ====== IL TEAM: schede che si girano al clic e mostrano la presentazione ====== */
+    .team { padding: 40px 0 150px; }
+    .team-testa { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 56px;
+      border-bottom: 1px solid var(--linea); padding-bottom: 28px; }
+    .team h2 { font-family: var(--font); font-weight: 300; font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1; }
+    .team-testa p { color: var(--tenue); font-size: .95rem; display: flex; align-items: center; gap: 10px; }
+    .team-testa p::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--colore-principale); }
+    .team-foto { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(16px, 2.4vw, 32px); }
+    .persona { display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left;
+      cursor: pointer; perspective: 1600px; }
+    .giro { display: block; position: relative; aspect-ratio: 4 / 5; transform-style: preserve-3d;
+      transition: transform .9s cubic-bezier(.3,.8,.25,1); }
+    .persona.girata .giro { transform: rotateY(180deg); }
+    .fronte, .retro { position: absolute; inset: 0; display: block; border-radius: 4px; overflow: hidden;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.35); }
+    .fronte img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+    .persona:hover .fronte img { transform: scale(1.03); }
+    .apri { position: absolute; top: 16px; right: 16px; display: flex; align-items: center; gap: 8px; padding: 9px 14px 8px;
+      border-radius: 40px; background: var(--colore-principale); color: var(--sfondo); font-size: .88rem; font-weight: 500; }
+    .apri::before { content: "+"; font-size: 1.15rem; line-height: .8; }
+    .retro { transform: rotateY(180deg); background: var(--colore-principale); color: var(--sfondo);
+      padding: clamp(26px, 3.6vw, 52px); display: flex; flex-direction: column; overflow-y: auto; }
+    .retro .nome { font-family: var(--font-titoli); font-weight: 400; font-size: clamp(2.4rem, 4.4vw, 3.8rem); line-height: 1; }
+    .retro .ruolo { font-size: .95rem; font-weight: 500; margin-top: 8px; opacity: .75; }
+    .retro .bio { margin-top: auto; padding-top: 28px; font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.45; display: grid; gap: 12px; }
+    .retro .chiudi { position: absolute; top: 16px; right: 16px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--sfondo); color: var(--testo); font-size: 1.2rem; }
+
+    /* ====== PULSANTI ====== */
+    .bottone { display: inline-flex; gap: 10px; align-items: center; margin: 56px auto 0; padding: 14px 26px; border-radius: 4px;
+      background: var(--colore-principale); color: var(--sfondo); text-decoration: none; font-weight: 500; }
+    .bottone:hover { filter: brightness(1.08); }
+    .centro { text-align: center; }
+
+    /* ====== 5. ANCORA QUI? ====== */
+    .finale { padding: 80px 0 150px; text-align: center; }
+    .finale .piccolo { color: var(--tenue); margin-bottom: 24px; font-size: .95rem; }
+    /* logo completo (LOGO COMPLETO NEGATIVO.png): solo la larghezza è fissata, l'altezza segue le proporzioni */
+    .finale h2 { position: relative; display: inline-block; margin-top: 40px; }
+    .finale h2 img { width: clamp(240px, 42vw, 520px); height: auto; }
+    .adesivo { position: absolute; right: -10px; top: -30px; display: flex; align-items: center; gap: 6px; transform: translateY(-100%); }
+    .adesivo span { background: var(--colore-principale); color: var(--sfondo); padding: 6px 12px 4px; font: 300 clamp(1rem, 1.6vw, 1.4rem) var(--font-titoli);
+      letter-spacing: 0; transform: rotate(-3deg); white-space: nowrap; }
+    .adesivo svg { width: 70px; color: var(--colore-principale); order: -1; transform: scaleX(-1) rotate(10deg); }
+    .contatti { display: flex; gap: 28px; justify-content: center; flex-wrap: wrap; margin-top: 40px; font-size: 1rem; }
+    .contatti a { text-decoration: none; font-weight: 400; }
+    .contatti a:hover { color: var(--colore-principale); }
+
+    /* ====== FOOTER: logo in basso a sinistra, sfondo blu ====== */
+    footer { background: var(--sfondo); border-top: 1px solid var(--linea); padding: 56px 0 110px; font-size: .9rem; color: var(--tenue); }
+    footer .contenitore { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+    footer .logo-footer img { height: 64px; width: auto; }
+    footer .note { text-align: right; display: grid; gap: 6px; }
+    footer a { color: inherit; }
+    footer a:hover { color: var(--colore-principale); }
+    @media (max-width: 600px) { footer .note { text-align: left; } }
+
+    /* ====== ANIMAZIONE ALLO SCORRIMENTO ====== */
+    @keyframes sali { from { opacity: 0; transform: translateY(30px); } }
+    .appare { opacity: 0; transform: translateY(50px); transition: opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); }
+    .appare.visibile { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .storia h1 { animation: none; }
+      .appare { opacity: 1; transform: none; transition: none; }
+      .giro { transition: none; }
+    }
+
+    /* ====== VERSIONE TELEFONO ====== */
+    @media (max-width: 800px) {
+      header { padding: 14px 16px; }
+      .logo img { height: 44px; }
+      .orologio { display: none; }
+      .storia { padding: 140px 0 80px; }
+      .team { padding: 20px 0 100px; }
+      .team-testa { flex-direction: column; align-items: flex-start; margin-bottom: 36px; }
+      .retro { padding: 24px; }
+      .retro .nome { font-size: 2.2rem; }
+      .barra a { padding: 9px 11px; font-size: .82rem; }
+      .barra .su { width: 36px; height: 36px; }
+      .adesivo { right: 0; top: -10px; }
+      .adesivo svg { display: none; }
+    }
+    /* telefoni: menu in basso più compatto, così sta tutto nello schermo */
+    @media (max-width: 560px) {
+      .barra { bottom: calc(14px + env(safe-area-inset-bottom)); }
+      .barra li:first-child, .barra .lungo { display: none; }
+      .barra a { padding: 9px 10px; }
+      .team-foto { grid-template-columns: 1fr; max-width: 440px; margin-inline: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= BARRA IN ALTO + MENU ================= -->
+  <header>
+    <a href="index.html" class="logo"><img src="img/logo-neg.svg" alt="Muoversi con Me — torna alla home"></a>
+    <div class="orologio"><span id="ora">--:--:--</span> ITA</div>
+  </header>
+
+  <ul class="barra">
+    <li><a href="#top" class="su" aria-label="Torna su">↑</a></li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html" class="attivo">About me</a></li>
+    <li><a href="index.html#autonomia"><span class="lungo">Progetto </span>Autonomia</a></li>
+    <li><a href="index.html#contatti">Contatti</a></li>
+  </ul>
+
+  <!-- ================= 1. ABOUT ME. ================= -->
+  <section class="storia" id="top">
+    <div class="contenitore">
+      <h1>About <img src="img/logo-me-neg.png" alt="Me."></h1>
+      <div class="racconto">
+        <p class="appare">Muoversi con <em>Me.</em> nasce da un'idea semplice: <span class="evidenza">ogni persona ha una storia, abitudini e bisogni diversi.</span> Per questo, un percorso di benessere non può essere uguale per tutti, ma deve partire da chi sei, da dove ti trovi e da dove vuoi arrivare.</p>
+        <p class="appare">L'obiettivo non è inseguire un modello ideale, ma <span class="evidenza">costruire un rapporto più consapevole con il proprio corpo</span>, attraverso piccoli cambiamenti che possano diventare parte della vita quotidiana.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 2. IL TEAM: clic sulla foto = la scheda si gira e mostra la presentazione (foto in img/team/) ================= -->
+  <section class="team">
+    <div class="contenitore">
+      <div class="team-testa appare">
+        <h2>Le persone dietro <em>Me.</em></h2>
+        <p>Clicca su una foto per conoscerci</p>
+      </div>
+      <div class="team-foto">
+        <button class="persona appare" type="button" aria-expanded="false">
+          <span class="giro">
+            <span class="fronte"><img src="img/team/gabriele.jpg" alt="Gabriele, Communication &amp; Method Development" loading="lazy"><span class="apri">Chi sono</span></span>
+            <span class="retro">
+              <span class="chiudi" aria-hidden="true">×</span>
+              <span class="nome">Gabriele</span>
+              <span class="ruolo">Communication &amp; Method Development</span>
+              <span class="bio">
+                <span>Sono Gabriele, ho 26 anni. Il mio percorso nel fitness nasce da un disagio: non mi accettavo e l’allenamento è stata la prima forma di salvezza.</span>
+                <span>Sono laureato in Scienze Motorie. Le mie competenze tecniche e personali mi hanno permesso di aiutare altre persone.</span>
+              </span>
+            </span>
+          </span>
+        </button>
+        <button class="persona appare" type="button" aria-expanded="false">
+          <span class="giro">
+            <span class="fronte"><img src="img/team/alessandro.jpg" alt="Alessandro, Co-founder" loading="lazy"><span class="apri">Chi sono</span></span>
+            <span class="retro">
+              <span class="chiudi" aria-hidden="true">×</span>
+              <span class="nome">Alessandro</span>
+              <span class="ruolo">Co-founder</span>
+              <span class="bio">
+                <span>Sono Alessandro, il movimento è stato prima un rifugio, poi una necessità.</span>
+                <span>Ho costruito strumenti e consapevolezza che hanno influenzato scelte decisive per la mia vita e la mia salute.</span>
+                <span>Oggi il mio lavoro è restituire quegli strumenti a chi si affida al mio percorso. Sono laureato in Scienze Motorie e studente in magistrale.</span>
+              </span>
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 3. MISSIONE ================= -->
+  <section class="missione">
+    <div class="contenitore">
+      <h2 class="appare"><span class="da-compilare">[Titolo da definire]</span></h2>
+      <p class="appare">Non puntiamo a fare volume, ma a camminare accanto alle persone giuste, con cura e coerenza.</p>
+      <a href="index.html#contatti" class="bottone appare">Inizia il tuo percorso&nbsp;&nbsp;→</a>
+    </div>
+  </section>
+
+  <!-- ================= 4. BANNER REEL INSTAGRAM ================= -->
+  <!-- Per cambiare un reel: salva la copertina in img/reels/ e metti il link del reel in href -->
+  <div class="appare">
+    <div class="reel-banner" aria-label="Reel di Instagram">
+      <div class="reel-traccia">
+        <a class="reel" href="https://www.instagram.com/reel/De32_-UT1nZ/" target="_blank" rel="noopener"><img src="img/reels/De32_-UT1nZ.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/Dewy3uaMpKF/" target="_blank" rel="noopener"><img src="img/reels/Dewy3uaMpKF.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/DepI5h6sLfx/" target="_blank" rel="noopener"><img src="img/reels/DepI5h6sLfx.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/DeeH4SyMOWR/" target="_blank" rel="noopener"><img src="img/reels/DeeH4SyMOWR.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/DeBy7zYTvAd/" target="_blank" rel="noopener"><img src="img/reels/DeBy7zYTvAd.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/Dd6Ei4MzUPe/" target="_blank" rel="noopener"><img src="img/reels/Dd6Ei4MzUPe.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/DdtMerCx-tG/" target="_blank" rel="noopener"><img src="img/reels/DdtMerCx-tG.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/DdleLd1xwcL/" target="_blank" rel="noopener"><img src="img/reels/DdleLd1xwcL.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+        <a class="reel" href="https://www.instagram.com/reel/DddupbkxFGt/" target="_blank" rel="noopener"><img src="img/reels/DddupbkxFGt.jpg" alt="Reel Instagram di Muoversi con Me" loading="lazy"></a>
+      </div>
+    </div>
+    <p class="reel-firma">Seguici su Instagram: <a href="https://www.instagram.com/muoversiconme/" target="_blank" rel="noopener">@muoversiconme</a></p>
+  </div>
+
+  <!-- ================= 5. ANCORA QUI? ================= -->
+  <section class="finale">
+    <div class="contenitore">
+      <p class="piccolo appare">Ancora qui?</p>
+      <h2 class="appare">
+        <span class="adesivo"><svg viewBox="0 0 100 60" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 14 C 40 -4, 78 6, 88 44"/><path d="M76 36 L 88 46 L 94 31"/></svg><span>Lo so che vuoi</span></span>
+        <img src="img/logo-completo-neg.png" alt="Muoversi con Me.">
+      </h2>
+      <div class="contatti appare">
+        <a href="mailto:info@esempio.it">[Email]</a>
+        <a href="https://wa.me/390000000000">[WhatsApp]</a>
+        <a href="https://www.instagram.com/muoversiconme/" target="_blank" rel="noopener">Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="contenitore">
+      <a href="index.html" class="logo-footer"><img src="img/logo-neg.svg" alt="Muoversi con Me"></a>
+      <div class="note">
+        <p>© 2026 Muoversi con Me · [Nome] · P.IVA [00000000000]</p>
+        <p><a href="#">Privacy Policy</a> · <a href="#">Cookie Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Orologio in alto a destra (ora italiana)
+    const ora = document.getElementById('ora');
+    const aggiornaOra = () => ora.textContent = new Date().toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome' });
+    aggiornaOra(); setInterval(aggiornaOra, 1000);
+
+    // Elementi .appare: salgono quando entrano nello schermo
+    const osservatore = new IntersectionObserver(voci => voci.forEach(v => {
+      if (v.isIntersecting) { v.target.classList.add('visibile'); osservatore.unobserve(v.target); }
+    }), { threshold: 0.15 });
+    document.querySelectorAll('.appare').forEach(el => osservatore.observe(el));
+
+    // Banner reel: scorre da solo in loop; si ferma col mouse sopra e si può trascinare o scorrere a mano
+    const banner = document.querySelector('.reel-banner');
+    const traccia = banner.querySelector('.reel-traccia');
+    [...traccia.children].forEach(c => {                       // duplica i reel per un loop senza stacchi
+      const copia = c.cloneNode(true); copia.setAttribute('aria-hidden', 'true'); copia.tabIndex = -1; traccia.append(copia);
+    });
+    const muoviPoco = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let posizione = 0, pausa = false, trascina = null, spostato = false;
+    const metà = () => traccia.scrollWidth / 2;
+    const avvolgi = () => {                                     // quando arrivi a metà, riparti dall'inizio senza che si veda
+      if (posizione >= metà()) posizione -= metà();
+      if (posizione < 0) posizione += metà();
+      banner.scrollLeft = posizione;
+    };
+    const anima = () => {
+      if (!pausa && !trascina && !muoviPoco) { posizione += 0.6; avvolgi(); }
+      requestAnimationFrame(anima);
+    };
+    requestAnimationFrame(anima);
+    banner.addEventListener('mouseenter', () => pausa = true);
+    banner.addEventListener('mouseleave', () => pausa = false);
+    banner.addEventListener('scroll', () => { if (pausa || trascina) posizione = banner.scrollLeft; }, { passive: true });
+    banner.addEventListener('touchstart', () => pausa = true, { passive: true });
+    banner.addEventListener('touchend', () => setTimeout(() => { posizione = banner.scrollLeft; pausa = false; }, 2500));
+    banner.addEventListener('pointerdown', e => {               // trascinamento con il mouse
+      if (e.pointerType !== 'mouse') return;
+      trascina = { x: e.clientX, inizio: banner.scrollLeft }; spostato = false; banner.classList.add('trascina');
+    });
+    window.addEventListener('pointermove', e => {
+      if (!trascina) return;
+      const dx = e.clientX - trascina.x;
+      if (Math.abs(dx) > 5) spostato = true;
+      posizione = trascina.inizio - dx; avvolgi();
+    });
+    window.addEventListener('pointerup', () => { trascina = null; banner.classList.remove('trascina'); });
+    banner.addEventListener('click', e => { if (spostato) { e.preventDefault(); spostato = false; } }, true);
+    banner.addEventListener('dragstart', e => e.preventDefault());
+
+    // Scorrendo, logo e orologio in alto spariscono
+    const aggiornaScorrimento = () => document.body.classList.toggle('scorso', window.scrollY > 200);
+    window.addEventListener('scroll', aggiornaScorrimento, { passive: true });
+    aggiornaScorrimento();
+
+    // Team: clic sulla foto = la scheda si gira e mostra la presentazione (di nuovo clic = torna la foto)
+    document.querySelectorAll('.persona').forEach(scheda => scheda.addEventListener('click', () => {
+      const aperta = scheda.classList.toggle('girata');
+      scheda.setAttribute('aria-expanded', aperta);
+    }));
+  </script>
+</body>
+</html>

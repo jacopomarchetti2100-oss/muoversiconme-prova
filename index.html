@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">   <!-- versione di prova: non compare su Google -->
+  <!-- SEO: cambia titolo e descrizione con parole che la gente cerca su Google -->
+  <title>Muoversi con me | [Cosa fai] a [Città]</title>
+  <meta name="description" content="[Descrizione di 150 caratteri: chi sei, cosa offri, dove. Es: Lezioni di movimento e ginnastica dolce a Bergamo, individuali e di gruppo.]">
+
+  <!-- Font Pulpo da Adobe Fonts (kit "Muoversi con Me - sito").
+       IMPORTANTE: quando pubblichi il sito, aggiungi il tuo dominio al kit su fonts.adobe.com → Web Projects -->
+  <link rel="stylesheet" href="https://use.typekit.net/axg5mfx.css">
+
+  <style>
+    /* ====== FONT DEL BRAND: Factor A Light (cartella fonts/) + Pulpo (Adobe Fonts) ====== */
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorALight-Regular.ttf") format("truetype"); font-weight: 300; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorA-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorAMedium-Regular.ttf") format("truetype"); font-weight: 500 600; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorA-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
+    /* ====== COLORI E FONT: cambia qui per cambiare tutto il sito ====== */
+    :root {
+      --colore-principale: #74cb1a;   /* verde del logo */
+      --colore-sezione: #8cc049;      /* verde della sezione che sale scorrendo */
+      --colore-scuro: #1b252e;        /* blu-nero del logo: testi e titoli */
+      --colore-chiaro: #eef0ec;       /* sfondi card e sezioni alternate */
+      --sfondo: #fafaf8;              /* sfondo pagina */
+      --bianco: #ffffff;
+      --font: "Factor A", "Helvetica Neue", Arial, sans-serif;
+      --font-titoli: "pulpo", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); font-weight: 300; font-size: 1.15rem; color: var(--colore-scuro); background: var(--sfondo); line-height: 1.5; }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; }
+    .contenitore { width: min(1200px, 100% - 32px); margin-inline: auto; }
+    section { padding: 100px 0; }
+    h1, h2, h3 { line-height: 1.1; font-weight: 400; }
+    h2 { font-family: var(--font); font-weight: 300; font-size: clamp(2.4rem, 6vw, 3.8rem); letter-spacing: -0.02em; margin-bottom: 16px; }
+    /* PAROLE CHIAVE: testo in Factor A Light, le parole dentro <em> diventano Pulpo verde */
+    em, .verde { font-family: var(--font-titoli); font-weight: 400; font-style: normal; color: var(--colore-principale); }
+    strong, b { font-weight: 500; }   /* grassetti nel testo: Factor A Medium (il Bold è solo per i titoli di Progetto Autonomia) */
+    .sottotitolo { max-width: 650px; margin-bottom: 40px; opacity: .85; }
+
+    /* Segnaposto: evidenzia i testi da sostituire (togli questa regola alla fine) */
+    .da-compilare { background: #fff3c4; border-radius: 4px; padding: 0 4px; }
+
+    /* ====== PULSANTI ====== */
+    .bottone { display: inline-block; padding: 12px 22px; border-radius: 4px; background: var(--colore-scuro);
+      color: var(--bianco); text-decoration: none; font-family: var(--font); font-size: .95rem; border: none; cursor: pointer; }
+    .bottone:hover { background: var(--colore-principale); color: var(--colore-scuro); }
+
+    /* ====== BARRA IN ALTO (logo a sinistra, orologio a destra) ====== */
+    header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center;
+      justify-content: space-between; padding: 18px 24px; pointer-events: none; }
+    header > * { pointer-events: auto; }
+    .logo img { height: 56px; width: auto; transition: opacity .3s; }
+    body.scorso .logo img { opacity: 0; pointer-events: none; }   /* il logo sparisce scorrendo, come nel riferimento */
+    .orologio { font-size: .9rem; letter-spacing: .06em; font-weight: 400; transition: opacity .3s; }
+    body.scorso .orologio { opacity: 0; }
+    .orologio .punto { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--colore-principale);
+      margin-right: 8px; vertical-align: middle; animation: pulsa 2s ease-in-out infinite; }
+    @keyframes pulsa { 50% { opacity: .3; } }
+
+    /* ====== MENU A PULSANTI IN BASSO ====== */
+    .barra { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 4px; align-items: center; }
+    .barra a, .barra button { display: block; padding: 10px 18px; border-radius: 4px; border: none; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+      background: var(--colore-scuro); color: var(--bianco); font: 400 .9rem var(--font); text-decoration: none;
+      white-space: nowrap; transition: background .2s, color .2s; }
+    .barra a:hover, .barra button:hover { background: var(--colore-principale); color: var(--colore-scuro); }
+    .menu { display: flex; gap: 4px; list-style: none; }
+    .barra .su { width: 40px; height: 40px; padding: 0; border-radius: 50%; display: grid; place-items: center; font-size: 1.1rem; }
+    .barra .apri-menu, .barra .su { display: none; }
+    /* Scorrendo, il menu si compatta in "↑  Menu  Contattami" (come nel riferimento) */
+    body.scorso .barra .su, body.scorso .barra .apri-menu { display: grid; }
+    body.scorso .barra .apri-menu { display: block; }
+    body.scorso .menu { display: none; }
+    body.scorso .barra.aperta .menu { display: flex; }
+    body.scorso .barra.aperta .apri-menu { background: var(--colore-principale); color: var(--colore-scuro); }
+    .menu-toggle { display: none; width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+      background: var(--colore-scuro); color: var(--bianco); font-size: 1.1rem; }
+
+    /* ====== HERO (prima schermata) ====== */
+    .hero { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 120px 0; }
+    .hero h1 { font-family: var(--font-titoli); font-weight: 300; font-size: clamp(2.6rem, 10vw, 8rem);
+      line-height: .82; letter-spacing: -0.03em; margin: 0 auto; }
+    .hero h1 .me { display: block; height: .65em; width: auto; margin: .12em auto 0; }   /* "Me." del logo, a capo */
+    .hero h1 em { font-weight: inherit; }
+    .hero h1 { animation: sali 1s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes sali { from { opacity: 0; transform: translateY(30px); } }
+
+    /* ====== SEZIONE VERDE: riquadro che si ingrandisce scorrendo (da 90% a 120%, come nel riferimento) ====== */
+    .intro { padding: 0; position: relative; z-index: 1; overflow-x: clip; }
+    .pannello { background: var(--colore-sezione); color: var(--colore-scuro); margin: 0 30px; padding: 200px 0 180px;
+      position: relative; text-align: center; transform: scale(var(--scala, .9)); will-change: transform; }
+    .etichetta { position: absolute; top: 90px; left: max(16px, calc(50% - 580px)); display: flex; align-items: flex-start; gap: 10px; text-align: left; }
+    .etichetta span { background: var(--bianco); padding: 14px 22px 10px; font-family: var(--font); font-weight: 300;
+      font-size: clamp(1.8rem, 3.4vw, 2.8rem); line-height: .95; transform: rotate(-3deg); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+    .etichetta svg { width: clamp(90px, 10vw, 150px); margin-top: 8px; }
+    .intro .testo-grande { font-family: var(--font); font-weight: 300; font-size: clamp(1.7rem, 3.4vw, 2.8rem);
+      line-height: 1.05; letter-spacing: -0.02em; max-width: 26ch; margin: 140px auto 0; }
+    .intro .testo-grande em { color: var(--bianco); }   /* sul verde il verde non si leggerebbe: parole chiave in bianco */
+    .intro .link { display: inline-block; margin-top: 56px; font-size: 1rem; text-decoration: none; font-weight: 400; }
+    .intro .link:hover { text-decoration: underline; }
+
+    /* ====== ANIMAZIONE ALLO SCORRIMENTO: gli elementi .appare salgono quando entrano nello schermo ====== */
+    .appare { opacity: 0; transform: translateY(60px); transition: opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); }
+    .appare.visibile { opacity: 1; transform: none; }
+
+
+    /* ====== PROGETTO AUTONOMIA: sfondo blu con griglia e scie verdi (come i caroselli Instagram) ====== */
+    .autonomia { position: relative; overflow: hidden; color: var(--bianco); padding: 260px 0 150px; background-color: var(--colore-scuro); }
+    /* griglia sfumata: svanisce verso i bordi */
+    .autonomia::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 72px 72px; background-position: center top;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent), linear-gradient(to right, transparent, #000 22%, #000 78%, transparent);
+      -webkit-mask-composite: source-in; mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent), linear-gradient(to right, transparent, #000 22%, #000 78%, transparent);
+      mask-composite: intersect; }
+    .autonomia .contenitore { position: relative; z-index: 1; }
+    .autonomia .scia { position: absolute; pointer-events: none; z-index: 0; }
+    .autonomia .scia path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 2.2s cubic-bezier(.4,0,.2,1); }
+    .autonomia .scia.visibile path { stroke-dashoffset: 0; }
+    .scia-1 { top: 40px; left: -60px; width: min(46vw, 560px); }
+    .scia-2 { top: 34%; right: -80px; width: min(42vw, 520px); }
+    .scia-3 { bottom: 60px; left: -40px; width: min(40vw, 480px); }
+    .autonomia .g { color: var(--colore-principale); }   /* parole verdi, stesso font come nella grafica */
+
+    .autonomia-titolo { text-align: center; text-transform: uppercase; font-weight: 500; letter-spacing: -0.01em; }
+    .autonomia-titolo img { height: clamp(34px, 4vw, 54px); width: auto; margin: 0 auto 26px; }   /* "Me." alto quanto le maiuscole, come nella grafica */
+    .autonomia-titolo h2 { font-weight: 700; font-size: clamp(2.3rem, 5.4vw, 4.4rem); line-height: .98; margin: 0; }
+    .autonomia-titolo .sotto { display: flex; align-items: center; justify-content: center; gap: .6em; margin-top: 20px;
+      text-transform: none; font-weight: 500; font-size: clamp(1rem, 2.2vw, 1.8rem); letter-spacing: 0; }
+    .autonomia-titolo .sotto::before, .autonomia-titolo .sotto::after { content: ""; width: 1.4em; height: 2px; background: var(--colore-principale); }
+
+    .autonomia-perche { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(40px, 6vw, 90px); align-items: center; margin-top: 150px; }
+    .autonomia-perche .frase { font-weight: 500; font-size: clamp(1.8rem, 3.6vw, 3.1rem); line-height: 1; letter-spacing: -0.025em; }
+    .autonomia-perche .frase-2 { font-weight: 400; font-size: clamp(1.15rem, 1.8vw, 1.6rem); line-height: 1.15; margin-top: 36px; max-width: 24ch; }
+    .collage { position: relative; aspect-ratio: 1 / 1.05; }
+    .collage img { position: absolute; object-fit: cover; border-radius: 4px; box-shadow: 0 30px 60px rgba(0,0,0,.35); }
+    .collage .grande { top: 0; right: 0; width: 72%; aspect-ratio: 3 / 4; }
+    .collage .piccola { bottom: 0; left: 0; width: 46%; aspect-ratio: 3 / 4; border: 6px solid var(--colore-scuro); }
+    .collage .bollino { position: absolute; top: 9%; left: 4%; background: var(--colore-principale); color: var(--colore-scuro);
+      padding: 8px 14px 6px; font-weight: 500; font-size: .9rem; transform: rotate(-4deg); z-index: 1; }
+
+    .autonomia-mesi { margin-top: 170px; text-align: center; font-weight: 500; letter-spacing: -0.02em; }
+    .autonomia-mesi .numero { font-weight: 700; font-size: clamp(4rem, 11vw, 9rem); line-height: .95; }
+    .autonomia-mesi p { font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.15; margin-top: 18px; }
+    .tappe { list-style: none; display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; margin-top: 80px; counter-reset: tappa; }
+    .tappa { counter-increment: tappa; }
+    .tappa figure { position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 4px; background: #24313c; }
+    .tappa figure img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+    .tappa:hover figure img { transform: scale(1.05); }
+    .tappa figure::before { content: "0" counter(tappa); position: absolute; top: 0; left: 0; z-index: 1;
+      background: var(--colore-scuro); padding: 6px 10px; font-size: .85rem; letter-spacing: .05em; }
+    .tappa p { margin-top: 14px; font-weight: 400; font-size: clamp(1rem, 1.3vw, 1.2rem); line-height: 1.15; }
+    .tappa:nth-child(2) { transition-delay: .1s; } .tappa:nth-child(3) { transition-delay: .2s; }
+    .tappa:nth-child(4) { transition-delay: .3s; } .tappa:nth-child(5) { transition-delay: .4s; }
+
+    .autonomia-cta { margin-top: 160px; text-align: center; }
+    .autonomia-cta p { text-transform: uppercase; font-weight: 500; letter-spacing: -0.02em; font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1.15; }
+    .autonomia-cta .bottone { margin-top: 36px; padding: 14px 24px; font-size: .95rem; background: var(--colore-principale); color: var(--colore-scuro); font-weight: 500; }
+    .autonomia-cta .bottone:hover { background: var(--bianco); }
+
+    /* ====== CARD (come funziona, recensioni) ====== */
+    .griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
+    .card { background: var(--bianco); border-radius: 4px; padding: 28px; }
+    .card h3 { margin-bottom: 8px; font-weight: 400; }
+    .griglia.passi { counter-reset: passo; grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 1100px) { .griglia.passi { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .griglia.passi { grid-template-columns: 1fr; } }
+    .passi .card::before { counter-increment: passo; content: "0" counter(passo); display: block; font-family: var(--font-titoli);
+      font-style: italic; font-size: 2.6rem; color: var(--colore-principale); margin-bottom: 12px; }
+    section.chiaro { background: var(--colore-chiaro); }
+
+    /* ====== CONTATTI ====== */
+    .contatti { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(40px, 6vw, 90px); align-items: start; }
+    .info-contatto { position: sticky; top: 110px; }
+    .info-contatto .bio { font-size: 1.3rem; line-height: 1.3; margin-bottom: 36px; }
+    .info-contatto .bio strong { font-weight: 500; }
+    .come-prenotare { list-style: none; counter-reset: p; display: grid; gap: 18px; margin-bottom: 40px; }
+    .come-prenotare li { counter-increment: p; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: baseline; }
+    .come-prenotare li::before { content: "0" counter(p); font-family: var(--font-titoli); font-size: 1.8rem; color: var(--colore-principale); line-height: 1; }
+    .info-contatto .bottone { padding: 16px 26px; font-size: 1.05rem; }
+    .info-contatto .social { margin-top: 28px; font-size: 1rem; }
+    .modulo { background: var(--bianco); border-radius: 4px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.06); }
+    .modulo iframe { display: block; width: 100%; height: 1150px; border: 0; }
+
+    /* ====== FOOTER ====== */
+    footer { background: var(--colore-scuro); color: #d5dcd8; padding: 56px 0 110px; font-size: .9rem; }
+    footer .contenitore { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; }
+    footer .logo-footer img { height: 64px; width: auto; }   /* logo in basso a sinistra */
+    footer .note { text-align: right; display: grid; gap: 6px; }
+    footer a:hover { color: var(--colore-principale); }
+    @media (max-width: 600px) { footer .note { text-align: left; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .hero h1, .orologio .punto { animation: none; }
+      .appare { opacity: 1; transform: none; transition: none; }
+      .autonomia .scia path { stroke-dashoffset: 0; transition: none; }
+    }
+
+    /* ====== VERSIONE TELEFONO ====== */
+    @media (max-width: 800px) {
+      section { padding: 70px 0; }
+      header { padding: 14px 16px; }
+      .logo img { height: 44px; }
+      .orologio { display: none; }
+      .menu-toggle { display: block; }
+      .barra { top: 70px; bottom: auto; left: auto; right: 16px; transform: none; }
+      .barra .su, .barra .apri-menu, body.scorso .barra .su, body.scorso .barra .apri-menu { display: none; }
+      .menu, body.scorso .menu { display: none; flex-direction: column; }
+      .barra.aperta .menu, body.scorso .barra.aperta .menu { display: flex; }
+      .pannello { margin: 0 16px; padding: 130px 0 110px; }
+      .etichetta { top: 40px; }
+      .intro .testo-grande { margin-top: 90px; }
+      .contatti { grid-template-columns: 1fr; }
+      .info-contatto { position: static; }
+      .autonomia { padding: 170px 0 100px; }
+      .autonomia::before { background-size: 48px 48px; }
+      .autonomia-perche { grid-template-columns: 1fr; margin-top: 100px; }
+      .collage { width: 100%; max-width: 520px; margin-inline: auto; }
+      .hero h1 { font-size: clamp(2.6rem, 12.5vw, 6rem); }
+      .autonomia-mesi, .autonomia-cta { margin-top: 110px; }
+      /* le 5 tappe scorrono in orizzontale col dito */
+      .tappe { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin: 50px -16px 0; padding: 0 16px 10px; scroll-padding-inline: 16px; scrollbar-width: none; }
+      .tappe::-webkit-scrollbar { display: none; }
+      .tappa { flex: 0 0 min(62%, 280px); scroll-snap-align: start; transition-delay: 0s !important; }
+      .scia-1, .scia-2, .scia-3 { width: 70vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= 1. BARRA IN ALTO + MENU ================= -->
+  <header>
+    <a href="#home" class="logo"><img src="img/logo.svg" alt="Muoversi con Me"></a>
+    <div class="orologio"><span class="punto"></span><span id="ora">--:--:--</span> ITA</div>
+    <button class="menu-toggle" aria-label="Apri menu" onclick="document.querySelector('.barra').classList.toggle('aperta')">☰</button>
+  </header>
+
+  <nav class="barra">
+    <a href="#home" class="su" aria-label="Torna su">↑</a>
+    <button class="apri-menu" onclick="document.querySelector('.barra').classList.toggle('aperta')">Menu</button>
+    <ul class="menu">
+      <li><a href="about.html">About me</a></li>
+      <li><a href="#autonomia">Progetto Autonomia</a></li>
+      <li><a href="#contatti">Contatti</a></li>
+    </ul>
+  </nav>
+
+  <!-- ================= 2. HERO: la prima cosa che si vede ================= -->
+  <section class="hero" id="home">
+    <div class="contenitore">
+      <!-- La parola dentro <em> diventa Pulpo verde -->
+      <h1>Il <em>cambiamento</em><br>parte&nbsp;da <img class="me" src="img/logo-me.png" alt="Me."></h1>
+    </div>
+  </section>
+
+  <!-- ================= 3. SEZIONE VERDE: il riquadro si ingrandisce mentre scorri ================= -->
+  <section class="intro" id="intro">
+    <div class="pannello">
+      <div class="etichetta">
+        <span>Vuoi saperne<br><em>di più?</em></span>
+        <svg viewBox="0 0 100 60" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M4 14 C 40 -4, 78 6, 88 44"/><path d="M76 36 L 88 46 L 94 31"/>
+        </svg>
+      </div>
+      <div class="contenitore">
+        <p class="testo-grande">Muoversi con <em>Me.</em> nasce da un’idea semplice: ogni corpo ha una <em>storia</em>, e nessun percorso può funzionare se non parte da lì. Per questo non esistono tabelle uguali per tutti, ma un <em>metodo</em> che si costruisce intorno alla <em>persona</em>.</p>
+        <a href="about.html" class="link">About me&nbsp;&nbsp;›</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 4. PROGETTO AUTONOMIA: sfondo blu, ispirato ai caroselli Instagram ================= -->
+  <section class="autonomia" id="autonomia">
+    <!-- Scie verdi decorative: si "disegnano" quando entrano nello schermo -->
+    <svg class="scia scia-1" viewBox="0 0 500 400" fill="none" aria-hidden="true">
+      <defs><linearGradient id="sfuma-1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#74cb1a"/><stop offset=".55" stop-color="#74cb1a" stop-opacity=".5"/><stop offset="1" stop-color="#74cb1a" stop-opacity="0"/></linearGradient></defs>
+      <path pathLength="1" d="M10 20 C 120 40, 110 200, 160 260 S 380 360, 490 380" stroke="url(#sfuma-1)" stroke-width="46" stroke-linecap="round"/>
+    </svg>
+    <svg class="scia scia-2" viewBox="0 0 500 400" fill="none" aria-hidden="true">
+      <defs><linearGradient id="sfuma-2" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#74cb1a"/><stop offset="1" stop-color="#74cb1a" stop-opacity="0"/></linearGradient></defs>
+      <path pathLength="1" d="M520 60 C 380 70, 220 120, 120 220 S 40 360, 10 390" stroke="url(#sfuma-2)" stroke-width="40" stroke-linecap="round"/>
+    </svg>
+    <svg class="scia scia-3" viewBox="0 0 500 300" fill="none" aria-hidden="true">
+      <defs><linearGradient id="sfuma-3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#74cb1a"/><stop offset="1" stop-color="#74cb1a" stop-opacity="0"/></linearGradient></defs>
+      <path pathLength="1" d="M-20 280 C 120 230, 260 160, 490 30" stroke="url(#sfuma-3)" stroke-width="40" stroke-linecap="round"/>
+    </svg>
+
+    <div class="contenitore">
+      <div class="autonomia-titolo appare">
+        <img src="img/logo-me-neg.png" alt="Me.">
+        <h2>Progetto<br><span class="g">Autonomia</span></h2>
+        <p class="sotto">Educazione al movimento</p>
+      </div>
+
+      <div class="autonomia-perche">
+        <div class="appare">
+          <p class="frase"><span class="g">Non vogliamo</span> semplicemente farti allenare.</p>
+          <p class="frase-2">Vogliamo darti <span class="g">gli strumenti</span> per imparare a <span class="g">prenderti cura del tuo corpo</span> nel tempo.</p>
+        </div>
+        <div class="collage appare">
+          <span class="bollino">6 mesi di percorso</span>
+          <img class="grande" src="img/autonomia/foto-14.jpg" alt="Esercizio di mobilità a terra seguito dal trainer">
+          <img class="piccola" src="img/autonomia/foto-19.jpg" alt="Lavoro con il bastone insieme al trainer">
+        </div>
+      </div>
+
+      <div class="autonomia-mesi appare">
+        <div class="numero"><span class="g">6</span> MESI</div>
+        <p>Per <span class="g">imparare a<br>gestire</span> il tuo allenamento.</p>
+      </div>
+      <!-- Le 5 tappe del percorso (dal carosello): cambia foto e testi qui -->
+      <ol class="tappe">
+        <li class="tappa appare"><figure><img src="img/autonomia/foto-16.jpg" alt="" loading="lazy"></figure><p>Consulenza <span class="g">gratuita</span></p></li>
+        <li class="tappa appare"><figure><img src="img/autonomia/foto-15.jpg" alt="" loading="lazy"></figure><p>Lezione di <span class="g">prova</span></p></li>
+        <li class="tappa appare"><figure><img src="img/autonomia/foto-18.jpg" alt="" loading="lazy"></figure><p>Allenamento in <span class="g">presenza</span></p></li>
+        <li class="tappa appare"><figure><img src="img/autonomia/foto-17.jpg" alt="" loading="lazy"></figure><p>Coaching <span class="g">online</span></p></li>
+        <li class="tappa appare"><figure><img src="img/autonomia/foto-20.jpg" alt="" loading="lazy"></figure><p>Sempre più <span class="g">autonomia</span></p></li>
+      </ol>
+
+      <div class="autonomia-cta appare">
+        <p>Compila il form e<br>prenota la tua <span class="g">consulenza<br>gratuita.</span></p>
+        <a href="#contatti" class="bottone">Prenota la consulenza&nbsp;&nbsp;→</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 6. COME FUNZIONA ================= -->
+  <section id="come-funziona" class="chiaro">
+    <div class="contenitore">
+      <h2 class="appare">Un percorso che parte da <em>Me.</em></h2>
+      <p class="sottotitolo appare">Nessuna tabella uguale per tutti: ogni fase è costruita su di te, sul tuo ritmo e sui tuoi obiettivi.</p>
+      <div class="griglia passi">
+        <div class="card appare"><h3>Ci conosciamo</h3><p>Un primo incontro per ascoltarti: la tua storia, le tue abitudini, cosa vorresti cambiare e cosa ti ha frenato finora. Nessun impegno, solo una chiacchierata per capire da dove partire.</p></div>
+        <div class="card appare"><h3>La lezione di prova</h3><p>Ci muoviamo insieme per la prima volta. È il momento per sentire il metodo sulla tua pelle, capire come risponde il tuo corpo e scoprire se Muoversi con <em>Me.</em> fa per te.</p></div>
+        <div class="card appare"><h3>Inizia il tuo percorso</h3><p>Costruiamo un percorso su misura, tra movimento consapevole, alimentazione e ascolto di sé. Passo dopo passo, con obiettivi chiari e realistici, e senza fretta.</p></div>
+        <div class="card appare"><h3>Ti muovi in autonomia</h3><p>L’obiettivo è che tu non abbia più bisogno di me ogni giorno. Diventi indipendente, e ci rivediamo per lezioni di allineamento: momenti per fare il punto, correggere la rotta e tenere viva la motivazione.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 10. CONTATTI ================= -->
+  <section id="contatti" class="chiaro">
+    <div class="contenitore contatti">
+      <div class="info-contatto appare">
+        <h2>Ancora <em>qui?</em></h2>
+        <!-- Testi presi dalla bio Instagram e dal modulo di prenotazione -->
+        <p class="bio"><strong>Muoversi con metodo.</strong> Un programma di allenamento che <em>educa</em> e <em>trasforma</em>.</p>
+        <ol class="come-prenotare">
+          <li><span>Compila il modulo: bastano <strong>nome e telefono</strong>.</span></li>
+          <li><span>Ti contattiamo su <strong>WhatsApp entro 24 ore</strong>.</span></li>
+          <li><span>Fissiamo la <strong>chiamata di consulenza gratuita</strong> (circa 20 minuti) e ti spieghiamo i prossimi passi.</span></li>
+        </ol>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSf8FRuVR6py6eGBNvW8qIIR1yqkJVK7nMLt9CecSjDFpLbrvw/viewform" target="_blank" rel="noopener" class="bottone">Prenota la consulenza gratuita&nbsp;&nbsp;→</a>
+        <p class="social">Seguici su Instagram: <a href="https://www.instagram.com/muoversiconme/" target="_blank" rel="noopener">@muoversiconme</a></p>
+      </div>
+      <!-- Modulo Google di prenotazione incorporato: le risposte arrivano direttamente nel loro Google Form -->
+      <div class="modulo appare">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8FRuVR6py6eGBNvW8qIIR1yqkJVK7nMLt9CecSjDFpLbrvw/viewform?embedded=true" title="Modulo di prenotazione consulenza" loading="lazy">Caricamento…</iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 11. FOOTER ================= -->
+  <footer>
+    <div class="contenitore">
+      <a href="#home" class="logo-footer"><img src="img/logo-neg.svg" alt="Muoversi con Me"></a>
+      <div class="note">
+        <p>© 2026 Muoversi con Me · [Nome] · P.IVA [00000000000]</p>
+        <p><a href="#">Privacy Policy</a> · <a href="#">Cookie Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Orologio in alto a destra (ora italiana)
+    const ora = document.getElementById('ora');
+    const aggiornaOra = () => ora.textContent = new Date().toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome' });
+    aggiornaOra(); setInterval(aggiornaOra, 1000);
+
+    // Menu: si chiude quando clicchi un link
+    const barra = document.querySelector('.barra');
+    barra.querySelectorAll('.menu a').forEach(link => link.addEventListener('click', () => barra.classList.remove('aperta')));
+
+    // Elementi .appare: salgono quando entrano nello schermo
+    const osservatore = new IntersectionObserver(voci => voci.forEach(v => {
+      if (v.isIntersecting) { v.target.classList.add('visibile'); osservatore.unobserve(v.target); }
+    }), { threshold: 0.15 });
+    document.querySelectorAll('.appare, .scia').forEach(el => osservatore.observe(el));
+
+    // Scorrimento: compatta il menu dopo la prima schermata e ingrandisce il riquadro verde
+    const intro = document.getElementById('intro');
+    const pannello = intro.querySelector('.pannello');
+    const muoviPoco = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const aggiornaScorrimento = () => {
+      const vh = window.innerHeight;
+      document.body.classList.toggle('scorso', window.scrollY > vh * 0.6);
+      if (!document.body.classList.contains('scorso')) barra.classList.remove('aperta');
+      // 0 quando il riquadro entra dal basso, 1 quando è arrivato a metà schermo
+      const avanzamento = Math.min(1, Math.max(0, (vh * 1.05 - intro.getBoundingClientRect().top) / (vh * 0.6)));
+      pannello.style.setProperty('--scala', muoviPoco ? 1 : (0.9 + 0.3 * avanzamento).toFixed(4));
+    };
+    window.addEventListener('scroll', aggiornaScorrimento, { passive: true });
+    aggiornaScorrimento();
+  </script>
+</body>
+</html>
