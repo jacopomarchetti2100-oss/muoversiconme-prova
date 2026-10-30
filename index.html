@@ -74,12 +74,8 @@
     .menu { display: flex; gap: 4px; list-style: none; }
     .barra .su { width: 40px; height: 40px; padding: 0; border-radius: 50%; display: grid; place-items: center; font-size: 1.1rem; }
     .barra .apri-menu, .barra .su { display: none; }
-    /* Scorrendo, il menu si compatta in "↑  Menu  Contattami" (come nel riferimento) */
-    body.scorso .barra .su, body.scorso .barra .apri-menu { display: grid; }
-    body.scorso .barra .apri-menu { display: block; }
-    body.scorso .menu { display: none; }
-    body.scorso .barra.aperta .menu { display: flex; }
-    body.scorso .barra.aperta .apri-menu { background: var(--colore-principale); color: var(--colore-scuro); }
+    /* Scorrendo, il menu resta aperto come nella prima schermata: compare solo il pulsante "↑" per tornare su */
+    body.scorso .barra .su { display: grid; }
     .menu-toggle { display: none; width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
       background: var(--colore-scuro); color: var(--bianco); font-size: 1.1rem; }
 
@@ -205,16 +201,19 @@
     }
 
     /* ====== VERSIONE TELEFONO ====== */
-    @media (max-width: 800px) {
-      section { padding: 70px 0; }
-      header { padding: 14px 16px; }
-      .logo img { height: 44px; }
-      .orologio { display: none; }
+    /* menu a tendina (☰) solo sui telefoni: su computer, anche con la finestra stretta, le voci restano tutte visibili */
+    @media (max-width: 600px) {
       .menu-toggle { display: block; }
       .barra { top: 70px; bottom: auto; left: auto; right: 16px; transform: none; }
       .barra .su, .barra .apri-menu, body.scorso .barra .su, body.scorso .barra .apri-menu { display: none; }
       .menu, body.scorso .menu { display: none; flex-direction: column; }
       .barra.aperta .menu, body.scorso .barra.aperta .menu { display: flex; }
+    }
+    @media (max-width: 800px) {
+      section { padding: 70px 0; }
+      header { padding: 14px 16px; }
+      .logo img { height: 44px; }
+      .orologio { display: none; }
       .pannello { margin: 0 16px; padding: 130px 0 110px; }
       .etichetta { top: 40px; }
       .intro .testo-grande { margin-top: 90px; }
