@@ -90,6 +90,13 @@
     .hero h1 .me { display: block; height: .65em; width: auto; margin: .12em auto 0; }   /* "Me." del logo, a capo */
     .hero h1 em { font-weight: inherit; }
     .hero h1 { animation: sali 1s cubic-bezier(.2,.7,.2,1) both; }
+    /* Scambio frase: le due frasi stanno una sopra l'altra e si dissolvono */
+    .scambia { display: grid; cursor: default; outline: none; }
+    .scambia .frase { grid-area: 1 / 1; display: block; align-self: center;
+      transition: opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1), filter .6s ease; }
+    .scambia .seconda { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+    .scambia:hover .prima, .scambia:focus-visible .prima, .scambia.attiva .prima { opacity: 0; transform: translateY(-18px); filter: blur(6px); }
+    .scambia:hover .seconda, .scambia:focus-visible .seconda, .scambia.attiva .seconda { opacity: 1; transform: none; filter: none; }
     @keyframes sali { from { opacity: 0; transform: translateY(30px); } }
 
     /* ====== SEZIONE VERDE: riquadro che si ingrandisce scorrendo (da 90% a 120%, come nel riferimento) ====== */
@@ -257,7 +264,11 @@
   <section class="hero" id="home">
     <div class="contenitore">
       <!-- La parola dentro <em> diventa Pulpo verde -->
-      <h1>Il <em>cambiamento</em><br>parte&nbsp;da <img class="me" src="img/logo-me.png" alt="Me."></h1>
+      <!-- Al passaggio del mouse (o al tocco su telefono) la frase cambia nella seconda -->
+      <h1 class="scambia" tabindex="0">
+        <span class="frase prima">Il <em>cambiamento</em><br>parte&nbsp;da <img class="me" src="img/logo-me.png" alt="Me."></span>
+        <span class="frase seconda" aria-hidden="true">Tutto parte da <em>qui.</em><br>Tutto parte&nbsp;da <img class="me" src="img/logo-me.png" alt=""></span>
+      </h1>
     </div>
   </section>
 
@@ -408,6 +419,12 @@
     };
     window.addEventListener('scroll', aggiornaScorrimento, { passive: true });
     aggiornaScorrimento();
+  </script>
+  <script>
+    // Su telefono (niente mouse) la frase cambia al tocco
+    document.querySelector('.scambia').addEventListener('click', function () {
+      if (!matchMedia('(hover: hover)').matches) this.classList.toggle('attiva');
+    });
   </script>
 </body>
 </html>
