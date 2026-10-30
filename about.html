@@ -39,13 +39,6 @@
       -webkit-mask-composite: source-in; mask-image: linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent), linear-gradient(to right, transparent, #000 22%, #000 78%, transparent);
       mask-composite: intersect; }
     @media (max-width: 800px) { body::before { background-size: 48px 48px; } }
-    /* scie verdi decorative (come Progetto Autonomia): si "disegnano" quando entrano nello schermo */
-    .scia { position: absolute; pointer-events: none; z-index: -1; }
-    .scia path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 2.2s cubic-bezier(.4,0,.2,1); }
-    .scia.visibile path { stroke-dashoffset: 0; }
-    .scia-1 { top: 40px; left: -60px; width: min(46vw, 560px); }
-    .scia-2 { top: 1560px; right: -80px; width: min(42vw, 520px); }
-    .scia-3 { bottom: 520px; left: -40px; width: min(40vw, 480px); }
     img { max-width: 100%; display: block; }
     a { color: inherit; }
     em { font-family: var(--font-titoli); font-weight: 300; color: var(--colore-principale); }
@@ -167,7 +160,6 @@
       .storia h1 { animation: none; }
       .appare { opacity: 1; transform: none; transition: none; }
       .giro { transition: none; }
-      .scia path { stroke-dashoffset: 0; transition: none; }
     }
 
     /* ====== VERSIONE TELEFONO ====== */
@@ -195,20 +187,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Scie verdi decorative, come in Progetto Autonomia -->
-  <svg class="scia scia-1" viewBox="0 0 500 400" fill="none" aria-hidden="true">
-    <defs><linearGradient id="sfuma-1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#74cb1a"/><stop offset=".55" stop-color="#74cb1a" stop-opacity=".5"/><stop offset="1" stop-color="#74cb1a" stop-opacity="0"/></linearGradient></defs>
-    <path pathLength="1" d="M10 20 C 120 40, 110 200, 160 260 S 380 360, 490 380" stroke="url(#sfuma-1)" stroke-width="46" stroke-linecap="round"/>
-  </svg>
-  <svg class="scia scia-2" viewBox="0 0 500 400" fill="none" aria-hidden="true">
-    <defs><linearGradient id="sfuma-2" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#74cb1a"/><stop offset="1" stop-color="#74cb1a" stop-opacity="0"/></linearGradient></defs>
-    <path pathLength="1" d="M520 60 C 380 70, 220 120, 120 220 S 40 360, 10 390" stroke="url(#sfuma-2)" stroke-width="40" stroke-linecap="round"/>
-  </svg>
-  <svg class="scia scia-3" viewBox="0 0 500 300" fill="none" aria-hidden="true">
-    <defs><linearGradient id="sfuma-3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#74cb1a"/><stop offset="1" stop-color="#74cb1a" stop-opacity="0"/></linearGradient></defs>
-    <path pathLength="1" d="M-20 280 C 120 230, 260 160, 490 30" stroke="url(#sfuma-3)" stroke-width="40" stroke-linecap="round"/>
-  </svg>
 
   <!-- ================= BARRA IN ALTO + MENU ================= -->
   <header>
@@ -340,7 +318,7 @@
     const osservatore = new IntersectionObserver(voci => voci.forEach(v => {
       if (v.isIntersecting) { v.target.classList.add('visibile'); osservatore.unobserve(v.target); }
     }), { threshold: 0.15 });
-    document.querySelectorAll('.appare, .scia').forEach(el => osservatore.observe(el));
+    document.querySelectorAll('.appare').forEach(el => osservatore.observe(el));
 
     // Banner reel: scorre da solo in loop; si ferma col mouse sopra e si può trascinare o scorrere a mano
     const banner = document.querySelector('.reel-banner');
