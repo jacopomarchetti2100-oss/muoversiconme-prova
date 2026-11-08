@@ -204,6 +204,60 @@
       .autonomia .scia path { stroke-dashoffset: 0; transition: none; }
     }
 
+    /* ====== INSIEME: scheda interattiva; il cursore "Tu" mostra come si usa, il cursore del coach reagisce ====== */
+    .insieme { background: var(--sfondo); overflow-x: clip; }
+    .insieme-griglia { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(40px, 6vw, 90px); align-items: center; }
+    .insieme-testo p { max-width: 34ch; font-size: 1.2rem; }
+    .insieme-testo .prova { margin-top: 26px; font-size: 1rem; font-weight: 400; color: #4f8f0f; }
+    .palco { position: relative; padding: 30px 0; }
+    .scheda { position: relative; background: var(--colore-scuro); color: var(--bianco); border-radius: 6px; padding: clamp(24px, 3vw, 38px);
+      box-shadow: 0 30px 60px rgba(27,37,46,.18); }
+    .scheda-testa { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .scheda-testa strong { font-weight: 500; font-size: 1.25rem; }
+    .scheda-testa span { font-size: .85rem; color: rgba(255,255,255,.6); }
+    .esercizi { list-style: none; margin: 10px 0 0; }
+    .esercizio { width: 100%; display: flex; align-items: center; gap: 14px; padding: 13px 6px; margin: 0 -6px; width: calc(100% + 12px); border: 0; border-bottom: 1px solid rgba(255,255,255,.07);
+      background: none; color: inherit; font: inherit; font-size: 1rem; text-align: left; cursor: pointer; border-radius: 4px; transition: color .3s, background .2s; }
+    .esercizio:hover { background: rgba(255,255,255,.05); }
+    .esercizio:focus-visible, .scheda button:focus-visible { outline: 2px solid var(--colore-principale); outline-offset: 2px; }
+    .esercizio small { margin-left: auto; color: rgba(255,255,255,.55); font-size: .85rem; }
+    .spunta { flex: none; width: 22px; height: 22px; border-radius: 4px; border: 1.5px solid rgba(255,255,255,.35); display: grid; place-items: center; transition: background .25s, border-color .25s; }
+    .spunta svg { width: 13px; opacity: 0; transform: scale(.4); transition: opacity .25s, transform .3s cubic-bezier(.3,1.6,.5,1); }
+    .esercizio.fatto .spunta { background: var(--colore-principale); border-color: var(--colore-principale); }
+    .esercizio.fatto .spunta svg { opacity: 1; transform: none; }
+    .esercizio.fatto > span:not(.spunta) { color: rgba(255,255,255,.55); text-decoration: line-through; text-decoration-color: var(--colore-principale); }
+    .obiettivo { margin-top: 22px; font-size: 1.05rem; color: rgba(255,255,255,.75); }
+    .obiettivo mark { color: var(--bianco); background: linear-gradient(rgba(116,203,26,.45), rgba(116,203,26,.45)) no-repeat left / 0% 100%; transition: background-size 1.2s linear; }
+    .obiettivo mark.selezionato { background-size: 100% 100%; }
+    .scheda-piede { display: flex; align-items: center; gap: 18px; margin-top: 26px; }
+    .scheda .bottone { border: 0; cursor: pointer; font: 500 1rem var(--font); background: var(--colore-principale); color: var(--colore-scuro); transition: opacity .3s, background .2s; }
+    .scheda .bottone:disabled { opacity: .35; cursor: not-allowed; }
+    .scheda .bottone.fatto { background: var(--bianco); }
+    .ricomincia { border: 0; background: none; color: rgba(255,255,255,.6); font: 400 .9rem var(--font); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .ricomincia:hover { color: var(--bianco); }
+    .avanzamento { margin-top: 18px; font-size: .85rem; color: rgba(255,255,255,.55); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    /* cursori */
+    .cursore { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; transition: transform .9s cubic-bezier(.45,0,.2,1); }
+    .cursore svg { width: 22px; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,.25)); }
+    .cursore .nome { position: absolute; left: 16px; top: 20px; padding: 4px 10px 3px; border-radius: 4px; font-size: .8rem; font-weight: 500; white-space: nowrap; }
+    .cursore .fumetto { position: absolute; left: 16px; top: 46px; padding: 8px 14px 7px; border-radius: 4px 14px 14px 14px; font-size: .95rem; white-space: nowrap;
+      opacity: 0; transform: translateY(6px) scale(.9); transform-origin: top left; transition: opacity .25s, transform .3s cubic-bezier(.3,1.5,.5,1); }
+    .cursore.parla .fumetto { opacity: 1; transform: none; }
+    .cursore.clic svg { transform: scale(.82); }
+    .cursore svg { transition: transform .12s; }
+    .cursore-coach .nome, .cursore-coach .fumetto { background: var(--colore-principale); color: var(--colore-scuro); }
+    .cursore-tu .nome { background: var(--bianco); color: var(--colore-scuro); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+    .cursore-tu { transition: transform .9s cubic-bezier(.45,0,.2,1), opacity .4s; }
+    /* quando tocca a te, il cursore "Tu" segue il mouse al posto della freccia di sistema (solo con il mouse) */
+    @media (hover: hover) and (pointer: fine) {
+      .palco.tocca-a-te, .palco.tocca-a-te button { cursor: none; }
+      .palco.tocca-a-te .cursore-tu { transition: opacity .2s; }
+      .palco.tocca-a-te:not(.mouse-dentro) .cursore-tu { opacity: 0; }
+    }
+    @media not ((hover: hover) and (pointer: fine)) { .palco.tocca-a-te .cursore-tu { opacity: 0; } }
+    @media (max-width: 800px) { .insieme-griglia { grid-template-columns: 1fr; } }
+
     /* ====== VERSIONE TELEFONO ====== */
     /* menu a tendina (☰) solo sui telefoni: su computer, anche con la finestra stretta, le voci restano tutte visibili */
     @media (max-width: 600px) {
@@ -349,6 +403,40 @@
     </div>
   </section>
 
+  <!-- ================= INSIEME: due cursori "dal vivo" lavorano sulla scheda (stile multiplayer) ================= -->
+  <section class="insieme" id="insieme">
+    <div class="contenitore insieme-griglia">
+      <div class="insieme-testo">
+        <h2 class="appare">Non sei mai <em>da solo.</em></h2>
+        <p class="appare">Il tuo piano non è un PDF da scaricare e dimenticare: il tuo coach lo segue con te, settimana dopo settimana. Corregge, motiva e festeggia ogni traguardo.</p>
+        <p class="prova appare">Provalo tu: spunta gli esercizi della settimana →</p>
+      </div>
+
+      <div class="palco appare" id="palco">
+        <div class="scheda">
+          <div class="scheda-testa"><strong>Il tuo piano</strong><span>Settimana 3</span></div>
+          <ul class="esercizi">
+            <li><button type="button" class="esercizio fatto" aria-pressed="true"><span class="spunta"><svg viewBox="0 0 14 11" fill="none"><path d="M1.5 5.5l4 4L12.5 1.5" stroke="#1b252e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Mobilità dell'anca</span><small>10'</small></button></li>
+            <li><button type="button" class="esercizio fatto" aria-pressed="true"><span class="spunta"><svg viewBox="0 0 14 11" fill="none"><path d="M1.5 5.5l4 4L12.5 1.5" stroke="#1b252e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Camminata a passo svelto</span><small>30'</small></button></li>
+            <li><button type="button" class="esercizio" aria-pressed="false"><span class="spunta"><svg viewBox="0 0 14 11" fill="none"><path d="M1.5 5.5l4 4L12.5 1.5" stroke="#1b252e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Squat al muro</span><small>3 × 10</small></button></li>
+            <li><button type="button" class="esercizio" aria-pressed="false"><span class="spunta"><svg viewBox="0 0 14 11" fill="none"><path d="M1.5 5.5l4 4L12.5 1.5" stroke="#1b252e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Respirazione</span><small>5'</small></button></li>
+          </ul>
+          <p class="obiettivo">Obiettivo: <mark id="obiettivo">salire le scale senza fiatone</mark></p>
+          <div class="scheda-piede">
+            <button type="button" class="bottone" id="completa" disabled>Segna la settimana</button>
+            <button type="button" class="ricomincia" id="ricomincia">Ricomincia</button>
+          </div>
+          <p class="avanzamento"><span id="contatore">2 di 4</span> esercizi fatti</p>
+        </div>
+
+        <div class="cursore cursore-coach" id="cursore-coach" aria-hidden="true"><svg viewBox="0 0 22 26"><path d="M2 2l18 9.5-8 2.2-3.6 8.3z" fill="#74cb1a" stroke="#1b252e" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="nome">Il tuo coach</span><span class="fumetto"></span></div>
+        <div class="cursore cursore-tu" id="cursore-tu" aria-hidden="true"><svg viewBox="0 0 22 26"><path d="M2 2l18 9.5-8 2.2-3.6 8.3z" fill="#ffffff" stroke="#1b252e" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="nome">Tu</span></div>
+        <p class="sr-only" aria-live="polite" id="annuncio"></p>
+      </div>
+    </div>
+  </section>
+
+
   <!-- ================= 10. CONTATTI ================= -->
   <section id="contatti" class="chiaro">
     <div class="contenitore contatti">
@@ -411,6 +499,90 @@
     };
     window.addEventListener('scroll', aggiornaScorrimento, { passive: true });
     aggiornaScorrimento();
+
+    // Insieme: scheda interattiva. Finché nessuno la tocca, il cursore "Tu" mostra come si usa;
+    // al primo clic la dimostrazione si ferma e la scheda è tua. Il coach reagisce a ogni esercizio.
+    (() => {
+      const palco = document.getElementById('palco');
+      const coach = document.getElementById('cursore-coach'), tu = document.getElementById('cursore-tu');
+      const esercizi = [...palco.querySelectorAll('.esercizio')];
+      const completa = document.getElementById('completa'), ricomincia = document.getElementById('ricomincia');
+      const contatore = document.getElementById('contatore'), annuncio = document.getElementById('annuncio');
+      const iniziali = esercizi.map(b => b.classList.contains('fatto'));
+      const incoraggia = ['Ottimo lavoro!', 'Così si fa!', 'Avanti così', 'Un passo alla volta'];
+      const attesa = ms => new Promise(r => setTimeout(r, ms));
+      const vai = (c, el, fx = .5, fy = .5) => {
+        const p = palco.getBoundingClientRect(), r = el.getBoundingClientRect();
+        c.style.transform = `translate(${r.left - p.left + r.width * fx}px, ${r.top - p.top + r.height * fy}px)`;
+      };
+      let timerFumetto;
+      const dici = testo => {
+        coach.querySelector('.fumetto').textContent = testo; coach.classList.add('parla'); annuncio.textContent = 'Il tuo coach: ' + testo;
+        clearTimeout(timerFumetto); timerFumetto = setTimeout(() => coach.classList.remove('parla'), 1900);
+      };
+      const aggiorna = () => {
+        const fatti = esercizi.filter(b => b.classList.contains('fatto')).length;
+        contatore.textContent = `${fatti} di ${esercizi.length}`;
+        if (!completa.classList.contains('fatto')) completa.disabled = fatti < esercizi.length;
+        return fatti;
+      };
+      const spunta = b => {
+        if (completa.classList.contains('fatto')) return;
+        const fatto = b.classList.toggle('fatto'); b.setAttribute('aria-pressed', fatto);
+        const fatti = aggiorna();
+        vai(coach, b, .97, .5);
+        if (!fatto) dici('Nessun problema, riprova domani');
+        else if (fatti === esercizi.length) { dici('Tutto fatto! Ora segna la settimana'); setTimeout(() => vai(coach, completa, .9, .6), 700); }
+        else dici(incoraggia[Math.floor(Math.random() * incoraggia.length)]);
+      };
+      const segna = () => {
+        completa.classList.add('fatto'); completa.disabled = true; completa.textContent = 'Settimana completata ✓';
+        vai(coach, completa, .9, .6); dici('Grande! Ci vediamo la prossima settimana');
+      };
+      const azzera = () => {
+        esercizi.forEach((b, i) => { b.classList.toggle('fatto', iniziali[i]); b.setAttribute('aria-pressed', iniziali[i]); });
+        completa.classList.remove('fatto'); completa.textContent = 'Segna la settimana'; aggiorna();
+        vai(coach, palco, .9, .08); if (demo) vai(tu, palco, .1, .97);
+      };
+
+      // dimostrazione automatica (si ferma per sempre al primo tocco della persona)
+      let demo = !window.matchMedia('(prefers-reduced-motion: reduce)').matches, visibile = false, inCorso = false;
+      const clic = async el => { tu.classList.add('clic'); await attesa(160); tu.classList.remove('clic'); el.click(); };
+      const dimostra = async () => {
+        if (inCorso) return; inCorso = true;
+        while (demo && visibile) {
+          azzera(); await attesa(1200);
+          for (const b of esercizi.filter(b => !b.classList.contains('fatto'))) {
+            if (!demo) break; vai(tu, b, .03, .5); await attesa(1100); if (!demo) break; await clic(b); await attesa(1700);
+          }
+          if (!demo) break; vai(tu, completa, .4, .6); await attesa(1300); if (!demo) break; await clic(completa); await attesa(3200);
+        }
+        inCorso = false;
+      };
+      const prendiIlControllo = e => {
+        if (!e.isTrusted || !demo) return;
+        demo = false; palco.classList.add('tocca-a-te'); azzera(); dici('Tocca a te: spunta gli esercizi');
+      };
+      palco.addEventListener('pointerdown', prendiIlControllo, true);
+      // quando tocca a te, il cursore "Tu" segue il mouse e "clicca" insieme a te
+      palco.addEventListener('pointermove', e => {
+        if (demo || e.pointerType !== 'mouse') return;
+        const p = palco.getBoundingClientRect();
+        tu.style.transform = `translate(${e.clientX - p.left}px, ${e.clientY - p.top}px)`;
+        palco.classList.add('mouse-dentro');
+      });
+      palco.addEventListener('pointerleave', () => palco.classList.remove('mouse-dentro'));
+      palco.addEventListener('pointerdown', () => { if (!demo) { tu.classList.add('clic'); setTimeout(() => tu.classList.remove('clic'), 160); } });
+      palco.addEventListener('keydown', prendiIlControllo, true);
+
+      esercizi.forEach(b => b.addEventListener('click', () => spunta(b)));
+      completa.addEventListener('click', segna);
+      ricomincia.addEventListener('click', () => { azzera(); dici('Si riparte!'); });
+      azzera();
+      if (!demo) palco.classList.add('tocca-a-te');
+      new IntersectionObserver(([v]) => { visibile = v.isIntersecting; if (visibile && demo) dimostra(); }, { threshold: .35 }).observe(palco);
+      window.addEventListener('resize', () => { vai(coach, palco, .9, .08); vai(tu, palco, .1, .97); });
+    })();
   </script>
 </body>
 </html>
