@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">   <!-- versione di prova: non compare su Google -->
+  <title>Area clienti | Muoversi con Me</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="img/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+  <!-- Font Pulpo da Adobe Fonts (stesso kit della home) -->
+  <link rel="stylesheet" href="https://use.typekit.net/axg5mfx.css">
+
+  <!--
+    ================================================================
+    AREA CLIENTI · VERSIONE DI PROVA
+    - Utenti di prova: PAKE / 1234 (cliente) e ALE / 4321 (coach).
+    - Tutto resta nel browser di chi la usa (localStorage per scheda e chat,
+      IndexedDB per i video): niente server, niente dati online.
+    - Per provarla: entra come PAKE, carica un video e scrivi in chat;
+      poi esci ed entra come ALE (oppure apri una seconda scheda del browser).
+    - NON è sicura per dati veri: le password sono scritte qui sotto nel codice.
+      Nella versione definitiva login, video e chat passeranno da un server (es. Supabase).
+    ================================================================
+  -->
+
+  <style>
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorALight-Regular.ttf") format("truetype"); font-weight: 300; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorA-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorAMedium-Regular.ttf") format("truetype"); font-weight: 500 600; font-display: swap; }
+    @font-face { font-family: "Factor A"; src: url("fonts/FactorA-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
+    /* ====== COLORI E FONT (stessi di About me) ====== */
+    :root {
+      --colore-principale: #74cb1a;   /* verde del logo */
+      --sfondo: #1b252e;              /* blu-nero del logo */
+      --superficie: #212d38;          /* pannelli */
+      --superficie-2: #2b3742;        /* pulsanti, fumetti chat */
+      --testo: #eef1ec;
+      --tenue: rgba(238, 241, 236, .62);
+      --tenuissimo: rgba(238, 241, 236, .4);
+      --linea: rgba(238, 241, 236, .12);
+      --font: "Factor A", "Helvetica Neue", Arial, sans-serif;
+      --font-titoli: "pulpo", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: var(--font); font-weight: 300; font-size: 1.05rem; line-height: 1.5; color: var(--testo); background: var(--sfondo); min-height: 100vh; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    em { font-family: var(--font-titoli); font-weight: 300; font-style: normal; color: var(--colore-principale); }
+    strong { font-weight: 500; }
+    [hidden] { display: none !important; }
+    :focus-visible { outline: 2px solid var(--colore-principale); outline-offset: 2px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .occhiello { font-size: .8rem; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--tenue); }
+
+    /* ====== BARRA IN ALTO ====== */
+    header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 16px 24px; background: rgba(27, 37, 46, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+    .logo img { height: 48px; width: auto; }
+    .orologio { font-size: .9rem; letter-spacing: .06em; font-weight: 400; color: var(--colore-principale); }
+    .utente { display: flex; align-items: center; gap: 12px; font-size: .95rem; }
+    .utente .chi { display: flex; align-items: center; gap: 10px; }
+    .utente .chi small { color: var(--tenue); font-size: .8rem; }
+    .pallino { width: 8px; height: 8px; border-radius: 50%; background: var(--colore-principale); }
+    .esci { border: 0; border-radius: 4px; padding: 9px 16px; background: var(--superficie-2); font-size: .9rem; transition: background .2s, color .2s; }
+    .esci:hover { background: var(--colore-principale); color: var(--sfondo); }
+
+    /* ====== MENU IN BASSO (come nelle altre pagine) ====== */
+    .barra { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 4px; list-style: none; }
+    .barra a { display: block; padding: 10px 18px; border-radius: 4px; background: var(--superficie-2); color: var(--testo); font: 400 .9rem var(--font);
+      text-decoration: none; white-space: nowrap; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); transition: background .2s, color .2s; }
+    .barra a:hover, .barra a.attivo { background: var(--colore-principale); color: var(--sfondo); }
+    .barra .voce-clienti::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--colore-principale);
+      margin-right: 8px; vertical-align: middle; transform: translateY(-1px); }
+    .barra .voce-clienti.attivo::before, .barra .voce-clienti:hover::before { background: var(--sfondo); }
+
+    /* ====== PULSANTI ====== */
+    .bottone { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 4px; padding: 12px 20px;
+      background: var(--colore-principale); color: var(--sfondo); font-weight: 500; font-size: .95rem; text-decoration: none; transition: background .2s, opacity .2s; }
+    .bottone:hover { background: var(--testo); }
+    .bottone:disabled { opacity: .4; cursor: not-allowed; }
+    .bottone.secondario { background: var(--superficie-2); color: var(--testo); font-weight: 400; }
+    .bottone.secondario:hover { background: var(--colore-principale); color: var(--sfondo); }
+    .bottone.piccolo { padding: 8px 14px; font-size: .85rem; }
+    .link-testo { border: 0; background: none; color: var(--tenue); font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; }
+    .link-testo:hover { color: var(--testo); }
+
+    /* ====== LOGIN ====== */
+    .login { position: relative; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 120px 16px 130px; overflow: hidden; }
+    /* griglia sfumata come in Progetto Autonomia */
+    .login::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 72px 72px; background-position: center;
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 70%); mask-image: radial-gradient(ellipse at center, #000 20%, transparent 70%); }
+    .login-scheda { position: relative; width: min(440px, 100%); }
+    .login h1 { font-weight: 300; font-size: clamp(2.6rem, 8vw, 3.6rem); line-height: 1; letter-spacing: -0.02em; margin: 12px 0 14px; }
+    .login .intro { color: var(--tenue); margin-bottom: 32px; }
+    .modulo-login { display: grid; gap: 16px; background: var(--superficie); border: 1px solid var(--linea); border-radius: 6px; padding: 28px; }
+    .campo { display: grid; gap: 6px; font-size: .9rem; color: var(--tenue); }
+    .campo input { width: 100%; padding: 13px 14px; border-radius: 4px; border: 1px solid var(--linea); background: var(--sfondo); color: var(--testo);
+      font-size: 1rem; letter-spacing: .02em; transition: border-color .2s; }
+    .campo input:focus { outline: none; border-color: var(--colore-principale); }
+    .campo-password { position: relative; }
+    .campo-password input { padding-right: 80px; }
+    .mostra { position: absolute; right: 6px; bottom: 6px; border: 0; border-radius: 4px; padding: 7px 10px; background: var(--superficie-2); font-size: .8rem; color: var(--tenue); }
+    .errore { color: #ff9b8a; font-size: .9rem; }
+    .errore:empty { display: none; }
+    .modulo-login .bottone { width: 100%; padding: 14px; font-size: 1rem; }
+    .scuoti { animation: scuoti .4s; }
+    @keyframes scuoti { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+    .prova-info { margin-top: 18px; font-size: .85rem; color: var(--tenue); }
+    .prova-info summary { cursor: pointer; width: fit-content; }
+    .prova-info ul { list-style: none; margin-top: 10px; display: grid; gap: 4px; }
+    .prova-info code { font-family: inherit; font-weight: 500; color: var(--testo); background: var(--superficie-2); padding: 1px 6px; border-radius: 3px; }
+
+    /* ====== CRUSCOTTO (cliente e coach): contenuto a sinistra, chat a destra ====== */
+    .cruscotto { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 20px; max-width: 1480px; margin: 0 auto;
+      height: 100vh; height: 100svh; padding: 92px 24px calc(92px + env(safe-area-inset-bottom)); }
+    .pannello { min-height: 0; overflow: auto; background: var(--superficie); border: 1px solid var(--linea); border-radius: 6px; padding: clamp(20px, 2.4vw, 32px);
+      container-type: inline-size; scrollbar-width: thin; scrollbar-color: var(--superficie-2) transparent; }
+    .pannello-testa { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px 24px; flex-wrap: wrap; margin-bottom: 22px; }
+    .pannello-testa h1, .pannello-testa h2 { font-weight: 300; font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.05; letter-spacing: -0.02em; margin-top: 6px; }
+    .riepilogo { display: flex; gap: 8px; flex-wrap: wrap; }
+    .etichetta { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; background: var(--superficie-2); font-size: .85rem; white-space: nowrap; }
+    .etichetta.verde { background: rgba(116, 203, 26, .16); color: var(--colore-principale); }
+    .etichetta.attesa { background: rgba(255, 196, 77, .14); color: #ffd27a; }
+    .obiettivo { margin-bottom: 18px; color: var(--tenue); }
+    .obiettivo mark { background: rgba(116, 203, 26, .28); color: var(--testo); padding: 1px 6px; border-radius: 2px; }
+    .nota-prova { margin-top: 22px; font-size: .8rem; color: var(--tenuissimo); }
+
+    /* ====== TABELLA ESERCIZI ====== */
+    .tabella { width: 100%; border-collapse: collapse; font-size: .98rem; }
+    .tabella th { text-align: left; font-weight: 400; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--tenue);
+      padding: 0 12px 12px; border-bottom: 1px solid var(--linea); white-space: nowrap; }
+    .tabella td { padding: 16px 12px; border-bottom: 1px solid var(--linea); vertical-align: middle; }
+    .tabella th:first-child, .tabella td:first-child { padding-left: 0; }
+    .tabella th:last-child, .tabella td:last-child { padding-right: 0; }
+    .tabella tr.ha-commento td { border-bottom: 0; padding-bottom: 8px; }
+    .es { display: grid; grid-template-columns: 34px 1fr; gap: 0 10px; align-items: baseline; }
+    .es .num { font-family: var(--font-titoli); color: var(--colore-principale); font-size: 1.25rem; line-height: 1; }
+    .es .nome { font-weight: 400; }
+    .es .nota { grid-column: 2; font-size: .85rem; color: var(--tenue); line-height: 1.35; margin-top: 3px; }
+    .dose { white-space: nowrap; }
+    .cella-video { min-width: 210px; }
+    .stato-video { display: grid; gap: 8px; justify-items: start; }
+    .azioni { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .meta { font-size: .8rem; color: var(--tenue); }
+    .carica { position: relative; }
+    .carica input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .carica:focus-within { outline: 2px solid var(--colore-principale); outline-offset: 2px; }
+    .icona { width: 16px; height: 16px; flex: none; }
+    .rotella { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); border-top-color: var(--colore-principale); animation: gira .8s linear infinite; }
+    @keyframes gira { to { transform: rotate(360deg); } }
+    .riga-commento td { padding-top: 0; }
+    .commento { margin-left: 44px; display: flex; gap: 12px; align-items: flex-start; background: rgba(116, 203, 26, .08); border-left: 2px solid var(--colore-principale);
+      border-radius: 0 6px 6px 0; padding: 12px 14px; font-size: .95rem; }
+    .commento img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex: none; }
+    .commento .chi { font-size: .78rem; color: var(--tenue); margin-bottom: 2px; }
+    .commento p { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+    /* tabella stretta: ogni esercizio diventa una scheda */
+    @container (max-width: 680px) {
+      .tabella thead { display: none; }
+      .tabella, .tabella tbody, .tabella tr, .tabella td { display: block; width: 100%; }
+      .tabella tr { border-bottom: 1px solid var(--linea); padding: 14px 0; }
+      .tabella tr.ha-commento { border-bottom: 0; padding-bottom: 0; }
+      .tabella td { border: 0; padding: 4px 0 4px 44px; }
+      .tabella td:first-child { padding-left: 0; }
+      .tabella td[data-etichetta]::before { content: attr(data-etichetta) " "; color: var(--tenue); font-size: .8rem; }
+      .tabella .dose { display: inline-block; width: auto; padding-right: 16px; }
+      .tabella .cella-video { padding-top: 10px; }
+      .riga-commento td { padding: 0 0 14px; }
+      .commento { margin-left: 44px; }
+    }
+
+    /* ====== VISTA COACH ====== */
+    .coach-griglia { display: grid; gap: 26px; }
+    .clienti-lista { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-bottom: 22px; border-bottom: 1px solid var(--linea); }
+    .clienti-lista .occhiello { margin-right: 8px; }
+    .cliente-voce { width: auto; min-width: 200px; }
+    .cliente-voce { display: flex; align-items: center; gap: 12px; text-align: left; border: 1px solid var(--linea); border-radius: 6px; padding: 10px 12px;
+      background: var(--superficie-2); transition: border-color .2s; }
+    .cliente-voce.attivo { border-color: var(--colore-principale); }
+    .cliente-voce small { display: block; color: var(--tenue); font-size: .78rem; }
+    .cliente-voce .conta { margin-left: auto; min-width: 22px; height: 22px; border-radius: 999px; background: var(--colore-principale); color: var(--sfondo);
+      font-size: .75rem; font-weight: 500; display: grid; place-items: center; padding: 0 6px; }
+    .iniziale { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--colore-principale); color: var(--sfondo);
+      font-weight: 500; }
+    .aggiungi-cliente { border: 1px dashed var(--linea); border-radius: 6px; padding: 10px 12px; background: none; color: var(--tenuissimo); font-size: .85rem; cursor: not-allowed; text-align: left; }
+    .feedback { display: grid; gap: 8px; }
+    .feedback textarea { width: 100%; min-height: 64px; resize: vertical; padding: 10px 12px; border-radius: 4px; border: 1px solid var(--linea); background: var(--sfondo);
+      color: var(--testo); font-size: .92rem; line-height: 1.4; }
+    .feedback textarea:focus { outline: none; border-color: var(--colore-principale); }
+    .feedback-fatto p { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .92rem; }
+    .in-attesa { color: var(--tenuissimo); font-size: .9rem; }
+    .cella-feedback { min-width: 220px; }
+    .dettaglio { min-width: 0; container-type: inline-size; }
+    .dose-coach { font-size: .92rem; }
+    @container (max-width: 520px) {
+      .clienti-lista .occhiello { display: none; }
+      .cliente-voce { min-width: 0; flex: 1; }
+    }
+    @container (max-width: 680px) {
+      .cella-feedback { min-width: 0; }
+      .trattino { display: none; }
+    }
+    .azzera { margin-top: 26px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: .8rem; color: var(--tenuissimo); }
+
+    /* ====== CHAT ====== */
+    .chat { display: flex; flex-direction: column; min-height: 0; background: var(--superficie); border: 1px solid var(--linea); border-radius: 6px; overflow: hidden; }
+    .chat-testa { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--linea); }
+    .chat-testa img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+    .chat-testa strong { display: block; font-weight: 500; }
+    .chat-testa small { color: var(--tenue); font-size: .8rem; display: flex; align-items: center; gap: 6px; }
+    .messaggi { flex: 1; min-height: 0; overflow-y: auto; list-style: none; padding: 18px; display: flex; flex-direction: column; gap: 10px;
+      scrollbar-width: thin; scrollbar-color: var(--superficie-2) transparent; }
+    .msg { max-width: 82%; display: grid; gap: 3px; }
+    .msg .fumetto { padding: 10px 14px; border-radius: 14px 14px 14px 4px; background: var(--superficie-2); white-space: pre-wrap; overflow-wrap: anywhere; font-size: .95rem; line-height: 1.4; }
+    .msg time { font-size: .72rem; color: var(--tenuissimo); padding: 0 4px; }
+    .msg.mio { align-self: flex-end; justify-items: end; }
+    .msg.mio .fumetto { background: var(--colore-principale); color: var(--sfondo); border-radius: 14px 14px 4px 14px; font-weight: 400; }
+    .msg.evento { align-self: center; max-width: 92%; justify-items: center; text-align: center; }
+    .msg.evento .fumetto { background: none; padding: 2px 0; font-size: .8rem; color: var(--tenue); display: flex; align-items: center; gap: 8px; }
+    .msg.evento .fumetto::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--colore-principale); flex: none; }
+    .msg.nuovo { animation: entra .35s cubic-bezier(.2,.7,.2,1); }
+    @keyframes entra { from { opacity: 0; transform: translateY(8px); } }
+    .chat-vuota { margin: auto; text-align: center; color: var(--tenuissimo); font-size: .9rem; }
+    .chat-scrivi { display: flex; align-items: flex-end; gap: 8px; padding: 12px; border-top: 1px solid var(--linea); }
+    .chat-scrivi textarea { flex: 1; resize: none; max-height: 140px; padding: 11px 14px; border-radius: 20px; border: 1px solid var(--linea); background: var(--sfondo);
+      color: var(--testo); font-size: .95rem; line-height: 1.35; }
+    .chat-scrivi textarea:focus { outline: none; border-color: var(--colore-principale); }
+    .invia { width: 42px; height: 42px; flex: none; border: 0; border-radius: 50%; background: var(--colore-principale); color: var(--sfondo); display: grid; place-items: center; transition: background .2s, opacity .2s; }
+    .invia:hover { background: var(--testo); }
+    .invia:disabled { opacity: .35; cursor: not-allowed; }
+    .invia svg { width: 18px; height: 18px; }
+
+    /* ====== VIDEO A SCHERMO INTERO ====== */
+    dialog.lettore { margin: auto; border: 0; padding: 0; background: var(--sfondo); color: var(--testo); border-radius: 8px; width: min(900px, 94vw); overflow: hidden; }
+    dialog.lettore::backdrop { background: rgba(10, 14, 18, .82); }
+    .lettore-testa { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; }
+    .lettore video { display: block; width: 100%; max-height: 72vh; background: #000; }
+    .chiudi { border: 0; border-radius: 4px; padding: 7px 12px; background: var(--superficie-2); }
+    .chiudi:hover { background: var(--colore-principale); color: var(--sfondo); }
+
+    /* ====== AVVISI ====== */
+    .avviso { position: fixed; top: 86px; left: 50%; z-index: 40; transform: translate(-50%, -12px); opacity: 0; pointer-events: none;
+      background: var(--testo); color: var(--sfondo); padding: 10px 18px; border-radius: 4px; font-size: .92rem; font-weight: 400;
+      box-shadow: 0 12px 30px rgba(0,0,0,.3); transition: opacity .25s, transform .3s cubic-bezier(.2,.7,.2,1); }
+    .avviso.visibile { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ====== SCHERMI PIÙ PICCOLI ====== */
+    @media (max-width: 980px) {
+      .cruscotto { display: flex; flex-direction: column; height: auto; padding: 88px 16px calc(96px + env(safe-area-inset-bottom)); }
+      .pannello { overflow: visible; }
+      .chat { height: 72vh; height: 72svh; min-height: 420px; }
+    }
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; }
+      .logo img { height: 40px; }
+      .utente .chi small { display: none; }
+      .barra { bottom: calc(14px + env(safe-area-inset-bottom)); }
+      .barra a { padding: 9px 10px; font-size: .82rem; }
+      .barra .lungo, .barra .solo-largo { display: none; }
+      .modulo-login { padding: 22px; }
+      .msg { max-width: 88%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body data-vista="login">
+
+  <!-- ================= BARRA IN ALTO ================= -->
+  <header>
+    <a href="index.html" class="logo"><img src="img/logo-neg.svg" alt="Muoversi con Me — torna alla home"></a>
+    <div class="orologio" id="orologio"><span id="ora">--:--:--</span> ITA</div>
+    <div class="utente" id="utente" hidden>
+      <span class="chi"><span class="pallino"></span><span><span id="utente-nome"></span> <small id="utente-ruolo"></small></span></span>
+      <button type="button" class="esci" id="esci">Esci</button>
+    </div>
+  </header>
+
+  <ul class="barra">
+    <li class="solo-largo"><a href="index.html">Home</a></li>
+    <li><a href="about.html">About me</a></li>
+    <li><a href="index.html#autonomia"><span class="lungo">Progetto </span>Autonomia</a></li>
+    <li><a href="index.html#contatti">Contatti</a></li>
+    <li><a href="area-clienti.html" class="voce-clienti attivo" aria-current="page"><span class="lungo">Area </span>Clienti</a></li>
+  </ul>
+
+  <main>
+    <!-- ================= 1. ACCESSO ================= -->
+    <section class="login" id="vista-login" aria-labelledby="titolo-login">
+      <div class="login-scheda">
+        <p class="occhiello">Area riservata</p>
+        <h1 id="titolo-login">La tua area <em>clienti.</em></h1>
+        <p class="intro">Entra per vedere la tua scheda, caricare i video degli esercizi e scrivere al tuo coach.</p>
+
+        <form class="modulo-login" id="modulo-login" novalidate>
+          <label class="campo">Nome utente
+            <input id="campo-utente" name="utente" autocomplete="username" autocapitalize="characters" spellcheck="false" required>
+          </label>
+          <label class="campo campo-password">Password
+            <input id="campo-password" name="password" type="password" autocomplete="current-password" required>
+            <button type="button" class="mostra" id="mostra-password" aria-pressed="false">Mostra</button>
+          </label>
+          <p class="errore" id="errore-login" role="alert"></p>
+          <button type="submit" class="bottone">Accedi&nbsp;&nbsp;→</button>
+        </form>
+
+        <!-- Solo per la prova: si può togliere quando si mostra al cliente -->
+        <details class="prova-info">
+          <summary>Credenziali di prova</summary>
+          <ul>
+            <li>Cliente: <code>PAKE</code> · <code>1234</code></li>
+            <li>Coach: <code>ALE</code> · <code>4321</code></li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= 2. VISTA CLIENTE ================= -->
+    <section class="cruscotto" id="vista-cliente" hidden aria-label="La tua area">
+      <div class="pannello">
+        <div class="pannello-testa">
+          <div>
+            <p class="occhiello">Ciao Pake · Settimana 3</p>
+            <h1>La tua scheda <em>della settimana.</em></h1>
+          </div>
+          <div class="riepilogo" id="riepilogo-cliente"></div>
+        </div>
+        <p class="obiettivo">Obiettivo: <mark>salire le scale senza fiatone</mark></p>
+        <table class="tabella">
+          <thead><tr><th scope="col">Esercizio</th><th scope="col">Serie × rip.</th><th scope="col">Recupero</th><th scope="col">Il tuo video</th></tr></thead>
+          <tbody id="righe-cliente"></tbody>
+        </table>
+        <p class="nota-prova">Registrati di lato, inquadrando tutto il corpo. Versione di prova: video e messaggi restano solo in questo browser.</p>
+      </div>
+      <aside class="chat" id="chat-cliente" aria-label="Chat con il coach"></aside>
+    </section>
+
+    <!-- ================= 3. VISTA COACH ================= -->
+    <section class="cruscotto" id="vista-coach" hidden aria-label="Area coach">
+      <div class="pannello">
+        <div class="coach-griglia">
+          <nav class="clienti-lista" aria-label="Clienti">
+            <p class="occhiello">I tuoi clienti</p>
+            <button type="button" class="cliente-voce attivo" aria-current="true">
+              <span class="iniziale">P</span>
+              <span>Pake<small>Settimana 3</small></span>
+              <span class="conta" id="conta-pake" hidden></span>
+            </button>
+            <button type="button" class="aggiungi-cliente" disabled title="Nella prossima versione">+ Nuovo cliente</button>
+          </nav>
+
+          <div class="dettaglio">
+            <div class="pannello-testa">
+              <div>
+                <p class="occhiello">Cliente · Progetto Autonomia</p>
+                <h1>Pake, <em>settimana 3.</em></h1>
+              </div>
+              <div class="riepilogo" id="riepilogo-coach"></div>
+            </div>
+            <p class="obiettivo">Obiettivo: <mark>salire le scale senza fiatone</mark></p>
+            <table class="tabella">
+              <thead><tr><th scope="col">Esercizio</th><th scope="col">Prescrizione</th><th scope="col">Video di Pake</th><th scope="col">Il tuo feedback</th></tr></thead>
+              <tbody id="righe-coach"></tbody>
+            </table>
+            <div class="azzera">
+              <span>Versione di prova: i dati restano solo in questo browser.</span>
+              <button type="button" class="link-testo" id="azzera">Azzera la prova</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="chat" id="chat-coach" aria-label="Chat con Pake"></aside>
+    </section>
+  </main>
+
+  <!-- Lettore video -->
+  <dialog class="lettore" id="lettore" aria-labelledby="lettore-titolo">
+    <div class="lettore-testa">
+      <strong id="lettore-titolo"></strong>
+      <button type="button" class="chiudi" id="chiudi-lettore">Chiudi ✕</button>
+    </div>
+    <video id="lettore-video" controls playsinline></video>
+  </dialog>
+
+  <div class="avviso" id="avviso" role="status" aria-live="polite"></div>
+
+  <noscript><p style="padding:120px 24px;text-align:center">Per usare l'area clienti serve JavaScript attivo nel browser.</p></noscript>
+
+  <script>
+  'use strict';
+
+  /* ===================== DATI DI PROVA ===================== */
+  // Utenti di prova (solo per la demo: nella versione vera il login passa da un server)
+  const UTENTI = {
+    PAKE: { password: '1234', ruolo: 'cliente', nome: 'Pake', ruoloTesto: 'Cliente' },
+    ALE:  { password: '4321', ruolo: 'coach', nome: 'Alessandro', ruoloTesto: 'Coach' },
+  };
+  const CLIENTE = 'PAKE', COACH = 'ALE';
+
+  // Scheda della settimana: cambia qui esercizi, dosi e note
+  const ESERCIZI = [
+    { id: 'mobilita', nome: "Mobilità dell'anca", nota: 'Movimento lento e controllato, senza forzare', serie: '2 × 10 per lato', recupero: '30"' },
+    { id: 'squat',    nome: 'Squat al muro', nota: 'Schiena appoggiata, ginocchia in linea con i piedi', serie: '3 × 10', recupero: '60"' },
+    { id: 'affondi',  nome: 'Affondi indietro', nota: 'Busto dritto, scendi finché il ginocchio sfiora terra', serie: '3 × 8 per gamba', recupero: '60"' },
+    { id: 'ponte',    nome: 'Ponte glutei', nota: 'Spingi con i talloni e tieni 2" in alto', serie: '3 × 12', recupero: '45"' },
+    { id: 'plank',    nome: 'Plank sulle ginocchia', nota: 'Addome attivo, respira normalmente', serie: '3 × 20"', recupero: '40"' },
+    { id: 'respiro',  nome: 'Respirazione diaframmatica', nota: 'Sdraiato, una mano sulla pancia', serie: "5'", recupero: '—' },
+  ];
+  const nomeEsercizio = id => (ESERCIZI.find(e => e.id === id) || {}).nome || id;
+
+  /* ===================== SALVATAGGIO NEL BROWSER ===================== */
+  const CHIAVE = 'mcm-area-clienti-prova-v1';
+  const statoIniziale = () => {
+    const ieri = Date.now() - 26 * 3600e3;
+    return { versione: 1, video: {}, messaggi: [
+      { id: 'm1', da: COACH, testo: 'Ciao Pake! Ti ho preparato la scheda della settimana 3: lavoriamo su gambe e core.', il: ieri },
+      { id: 'm2', da: COACH, testo: "Quando fai squat e affondi, registrati di lato e carica il video qui: così controllo l'esecuzione.", il: ieri + 60e3 },
+    ] };
+  };
+  let statoInMemoria = null;
+  const leggiStato = () => {
+    try {
+      const s = JSON.parse(localStorage.getItem(CHIAVE));
+      if (s && s.versione === 1) return (statoInMemoria = s);
+    } catch (e) { /* storage non disponibile: si usa la memoria */ }
+    return statoInMemoria || (statoInMemoria = statoIniziale());
+  };
+  const salvaStato = s => {
+    statoInMemoria = s;
+    try { localStorage.setItem(CHIAVE, JSON.stringify(s)); } catch (e) { /* resta in memoria */ }
+  };
+  let canale = null;
+  try { canale = new BroadcastChannel('mcm-area-clienti'); } catch (e) {}
+  const modifica = fn => { const s = leggiStato(); fn(s); salvaStato(s); disegna(); try { canale && canale.postMessage('aggiornato'); } catch (e) {} };
+
+  // Sessione: per ogni scheda del browser (così si possono aprire cliente e coach in due schede)
+  let sessioneInMemoria = null;
+  const sessione = {
+    leggi() { try { return sessionStorage.getItem('mcm-utente'); } catch (e) { return sessioneInMemoria; } },
+    scrivi(v) {
+      sessioneInMemoria = v;
+      try { v ? sessionStorage.setItem('mcm-utente', v) : sessionStorage.removeItem('mcm-utente'); } catch (e) {}
+    },
+  };
+
+  // Video: salvati in IndexedDB (i file sono troppo grandi per localStorage)
+  const archivioVideo = (() => {
+    const memoria = new Map();
+    let apertura = null;
+    const apri = () => apertura || (apertura = new Promise((ok, ko) => {
+      if (!('indexedDB' in window)) return ko(new Error('IndexedDB assente'));
+      const r = indexedDB.open('mcm-area-clienti-prova', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('video');
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => ko(r.error);
+    }));
+    const operazione = async (modo, fn) => {
+      const db = await apri();
+      return new Promise((ok, ko) => {
+        const t = db.transaction('video', modo), req = fn(t.objectStore('video'));
+        t.oncomplete = () => ok(req && req.result);
+        t.onerror = () => ko(t.error);
+      });
+    };
+    return {
+      async metti(k, file) { try { await operazione('readwrite', s => s.put(file, k)); } catch (e) { memoria.set(k, file); } },
+      async prendi(k) { try { return (await operazione('readonly', s => s.get(k))) || memoria.get(k); } catch (e) { return memoria.get(k); } },
+      async svuota() { memoria.clear(); try { await operazione('readwrite', s => s.clear()); } catch (e) {} },
+    };
+  })();
+
+  /* ===================== UTILITÀ ===================== */
+  const $ = id => document.getElementById(id);
+  const crea = (tag, prop, ...figli) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(prop || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'dataset') Object.assign(el.dataset, v);
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (k === 'svg') el.innerHTML = v;            // solo icone scritte qui, mai testo degli utenti
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const f of figli.flat()) if (f != null && f !== false) el.append(f instanceof Node ? f : String(f));
+    return el;
+  };
+  const nuovoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const formattaOra = t => {
+    const d = new Date(t), oggi = new Date(), ieri = new Date(); ieri.setDate(oggi.getDate() - 1);
+    const hhmm = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    if (d.toDateString() === oggi.toDateString()) return hhmm;
+    if (d.toDateString() === ieri.toDateString()) return 'ieri ' + hhmm;
+    return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }) + ' ' + hhmm;
+  };
+  const formattaDurata = s => { if (!s || !isFinite(s)) return ''; const t = Math.round(s); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+  const formattaPeso = b => b >= 1e6 ? (b / 1e6).toFixed(b >= 1e8 ? 0 : 1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
+  const ICONE = {
+    carica: '<svg class="icona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>',
+    play: '<svg class="icona" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>',
+    spunta: '<svg class="icona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    orologio: '<svg class="icona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    invia: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  };
+  const icona = nome => crea('span', { svg: ICONE[nome], 'aria-hidden': 'true', style: 'display:contents' });
+
+  let timerAvviso;
+  const avvisa = testo => {
+    const a = $('avviso'); a.textContent = testo; a.classList.add('visibile');
+    clearTimeout(timerAvviso); timerAvviso = setTimeout(() => a.classList.remove('visibile'), 2600);
+  };
+
+  /* ===================== OROLOGIO ===================== */
+  const aggiornaOra = () => $('ora').textContent = new Date().toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome' });
+  aggiornaOra(); setInterval(aggiornaOra, 1000);
+
+  /* ===================== ACCESSO ===================== */
+  $('modulo-login').addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = $('campo-utente').value.trim().toUpperCase();
+    const password = $('campo-password').value;
+    const utente = UTENTI[nome];
+    if (utente && utente.password === password) {
+      sessione.scrivi(nome);
+      $('campo-utente').value = ''; $('campo-password').value = ''; $('errore-login').textContent = '';
+      disegna(); window.scrollTo(0, 0);
+      avvisa(utente.ruolo === 'coach' ? 'Ciao Alessandro' : 'Ciao Pake, bentornato');
+    } else {
+      $('errore-login').textContent = nome || password ? 'Nome utente o password non corretti.' : 'Inserisci nome utente e password.';
+      const f = $('modulo-login'); f.classList.remove('scuoti'); void f.offsetWidth; f.classList.add('scuoti');
+    }
+  });
+  $('mostra-password').addEventListener('click', e => {
+    const campo = $('campo-password'), visibile = campo.type === 'password';
+    campo.type = visibile ? 'text' : 'password';
+    e.currentTarget.textContent = visibile ? 'Nascondi' : 'Mostra';
+    e.currentTarget.setAttribute('aria-pressed', visibile);
+  });
+  $('esci').addEventListener('click', () => { sessione.scrivi(null); disegna(); window.scrollTo(0, 0); });
+
+  /* ===================== VIDEO ===================== */
+  const inCaricamento = new Set();
+  const leggiDurata = file => new Promise(ok => {
+    const v = document.createElement('video'), url = URL.createObjectURL(file);
+    const fine = d => { clearTimeout(t); URL.revokeObjectURL(url); ok(d); };
+    const t = setTimeout(() => fine(0), 5000);
+    v.preload = 'metadata'; v.muted = true;
+    v.onloadedmetadata = () => fine(isFinite(v.duration) ? v.duration : 0);
+    v.onerror = () => fine(0);
+    v.src = url;
+  });
+  const caricaVideo = async (idEs, file) => {
+    if (!file) return;
+    if (!(file.type || '').startsWith('video/') && !/\.(mp4|mov|m4v|webm|3gp)$/i.test(file.name)) { avvisa('Scegli un file video (.mp4 o .mov)'); return; }
+    if (file.size > 500e6) { avvisa('Il video è troppo pesante: massimo 500 MB'); return; }
+    inCaricamento.add(idEs); disegna();
+    const durata = await leggiDurata(file);
+    await archivioVideo.metti(idEs, file);
+    inCaricamento.delete(idEs);
+    modifica(s => {
+      s.video[idEs] = { nome: file.name, peso: file.size, durata, il: Date.now(), stato: 'da-vedere', commento: '' };
+      s.messaggi.push({ id: nuovoId(), tipo: 'evento', da: CLIENTE, testo: 'Pake ha caricato il video: ' + nomeEsercizio(idEs), il: Date.now() });
+    });
+    avvisa('Video inviato al coach');
+  };
+  const lettore = $('lettore'), video = $('lettore-video');
+  let urlInVisione = null;
+  const guarda = async (idEs, titolo) => {
+    const file = await archivioVideo.prendi(idEs);
+    if (!file) { avvisa('Questo video non è disponibile in questo browser'); return; }
+    if (urlInVisione) URL.revokeObjectURL(urlInVisione);
+    urlInVisione = URL.createObjectURL(file);
+    video.src = urlInVisione; $('lettore-titolo').textContent = titolo;
+    if (typeof lettore.showModal === 'function') lettore.showModal(); else lettore.setAttribute('open', '');
+    video.play().catch(() => {});
+  };
+  const chiudiLettore = () => { if (lettore.open) lettore.close(); };
+  $('chiudi-lettore').addEventListener('click', chiudiLettore);
+  lettore.addEventListener('click', e => { if (e.target === lettore) chiudiLettore(); });
+  lettore.addEventListener('close', () => {
+    video.pause(); video.removeAttribute('src'); video.load();
+    if (urlInVisione) { URL.revokeObjectURL(urlInVisione); urlInVisione = null; }
+  });
+
+  /* ===================== VISTA CLIENTE ===================== */
+  const pulsanteCarica = (idEs, testo, secondario) => {
+    const input = crea('input', { type: 'file', accept: 'video/*', 'aria-label': testo + ': ' + nomeEsercizio(idEs) });
+    input.addEventListener('change', () => { caricaVideo(idEs, input.files && input.files[0]); input.value = ''; });
+    return crea('span', { class: 'bottone piccolo carica' + (secondario ? ' secondario' : '') }, icona('carica'), testo, input);
+  };
+  const cellaEsercizio = (es, i) => crea('td', null,
+    crea('div', { class: 'es' },
+      crea('span', { class: 'num' }, String(i + 1).padStart(2, '0')),
+      crea('span', { class: 'nome' }, es.nome),
+      crea('span', { class: 'nota' }, es.nota)));
+
+  function disegnaCliente(stato) {
+    const corpo = $('righe-cliente'); corpo.replaceChildren();
+    ESERCIZI.forEach((es, i) => {
+      const v = stato.video[es.id];
+      let contenuto;
+      if (inCaricamento.has(es.id)) {
+        contenuto = crea('div', { class: 'azioni meta' }, crea('span', { class: 'rotella', 'aria-hidden': 'true' }), 'Caricamento…');
+      } else if (!v) {
+        contenuto = pulsanteCarica(es.id, 'Carica video');
+      } else {
+        const visto = v.stato === 'visto';
+        contenuto = crea('div', { class: 'stato-video' },
+          crea('span', { class: 'etichetta ' + (visto ? 'verde' : 'attesa') }, icona(visto ? 'spunta' : 'orologio'), visto ? 'Visto dal coach' : 'Inviato · da vedere'),
+          crea('div', { class: 'azioni' },
+            crea('button', { type: 'button', class: 'bottone piccolo secondario', onclick: () => guarda(es.id, es.nome) }, icona('play'), 'Guarda'),
+            pulsanteCarica(es.id, 'Sostituisci', true)),
+          crea('span', { class: 'meta' }, [formattaDurata(v.durata), formattaPeso(v.peso), formattaOra(v.il)].filter(Boolean).join(' · ')));
+      }
+      const haCommento = v && v.stato === 'visto' && v.commento;
+      corpo.append(crea('tr', { class: haCommento ? 'ha-commento' : null },
+        cellaEsercizio(es, i),
+        crea('td', { class: 'dose', 'data-etichetta': 'Serie' }, es.serie),
+        crea('td', { class: 'dose', 'data-etichetta': 'Recupero' }, es.recupero),
+        crea('td', { class: 'cella-video' }, contenuto)));
+      if (haCommento) {
+        corpo.append(crea('tr', { class: 'riga-commento' }, crea('td', { colspan: 4 },
+          crea('div', { class: 'commento' },
+            crea('img', { src: 'img/team/alessandro.jpg', alt: '' }),
+            crea('div', null, crea('p', { class: 'chi' }, 'Alessandro · ' + formattaOra(v.commentatoIl || v.il)), crea('p', null, v.commento))))));
+      }
+    });
+    const inviati = ESERCIZI.filter(e => stato.video[e.id]).length;
+    const visti = ESERCIZI.filter(e => (stato.video[e.id] || {}).stato === 'visto').length;
+    $('riepilogo-cliente').replaceChildren(...[
+      crea('span', { class: 'etichetta' }, inviati + ' di ' + ESERCIZI.length + ' video inviati'),
+      visti ? crea('span', { class: 'etichetta verde' }, icona('spunta'), visti + (visti === 1 ? ' rivisto' : ' rivisti') + ' dal coach') : null].filter(Boolean));
+  }
+
+  /* ===================== VISTA COACH ===================== */
+  const bozze = new Map();          // testi del feedback non ancora inviati (non si perdono se la pagina si aggiorna)
+  const inModifica = new Set();      // feedback già inviati che il coach sta correggendo
+
+  const inviaFeedback = idEs => {
+    const testo = (bozze.get(idEs) || '').trim();
+    modifica(s => {
+      const v = s.video[idEs]; if (!v) return;
+      const primaVolta = v.stato !== 'visto';
+      v.stato = 'visto'; v.commento = testo; v.commentatoIl = Date.now();
+      if (primaVolta || testo) s.messaggi.push({ id: nuovoId(), tipo: 'evento', da: COACH, il: Date.now(),
+        testo: (testo ? 'Alessandro ha commentato il video: ' : 'Alessandro ha visto il video: ') + nomeEsercizio(idEs) });
+    });
+    bozze.delete(idEs); inModifica.delete(idEs);
+    avvisa('Feedback inviato a Pake');
+  };
+
+  function disegnaCoach(stato) {
+    const corpo = $('righe-coach'), attivo = document.activeElement, idAttivo = attivo && attivo.dataset && attivo.dataset.feedback;
+    corpo.replaceChildren();
+    ESERCIZI.forEach((es, i) => {
+      const v = stato.video[es.id];
+      let cellaVideo, cellaFeedback;
+      if (!v) {
+        cellaVideo = crea('span', { class: 'in-attesa' }, 'Non ancora caricato');
+        cellaFeedback = crea('span', { class: 'in-attesa trattino' }, '—');
+      } else {
+        const visto = v.stato === 'visto';
+        cellaVideo = crea('div', { class: 'stato-video' },
+          crea('button', { type: 'button', class: 'bottone piccolo' + (visto ? ' secondario' : ''), onclick: () => guarda(es.id, 'Pake · ' + es.nome) }, icona('play'), 'Guarda il video'),
+          crea('span', { class: 'meta' }, [formattaDurata(v.durata), formattaPeso(v.peso), formattaOra(v.il)].filter(Boolean).join(' · ')),
+          crea('span', { class: 'etichetta ' + (visto ? 'verde' : 'attesa') }, icona(visto ? 'spunta' : 'orologio'), visto ? 'Visto' : 'Da vedere'));
+        if (visto && !inModifica.has(es.id)) {
+          cellaFeedback = crea('div', { class: 'feedback feedback-fatto' },
+            v.commento ? crea('p', null, v.commento) : crea('span', { class: 'in-attesa' }, 'Segnato come visto, senza commento'),
+            crea('button', { type: 'button', class: 'link-testo', style: 'justify-self:start',
+              onclick: () => { inModifica.add(es.id); bozze.set(es.id, v.commento || ''); disegna(); } }, 'Modifica'));
+        } else {
+          const area = crea('textarea', { 'data-feedback': es.id, rows: 2, placeholder: 'Scrivi a Pake cosa correggere…', 'aria-label': 'Feedback su ' + es.nome });
+          area.value = bozze.has(es.id) ? bozze.get(es.id) : '';
+          area.addEventListener('input', () => bozze.set(es.id, area.value));
+          area.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) inviaFeedback(es.id); });
+          cellaFeedback = crea('div', { class: 'feedback' }, area,
+            crea('div', { class: 'azioni' },
+              crea('button', { type: 'button', class: 'bottone piccolo', onclick: () => inviaFeedback(es.id) }, icona('spunta'), visto ? 'Salva' : 'Invia e segna come visto'),
+              visto ? crea('button', { type: 'button', class: 'link-testo', onclick: () => { inModifica.delete(es.id); bozze.delete(es.id); disegna(); } }, 'Annulla') : null));
+        }
+      }
+      corpo.append(crea('tr', null,
+        cellaEsercizio(es, i),
+        crea('td', { class: 'dose-coach', 'data-etichetta': 'Prescrizione' }, es.serie, crea('br'), crea('span', { class: 'meta' }, 'recupero ' + es.recupero)),
+        crea('td', { class: 'cella-video' }, cellaVideo),
+        crea('td', { class: 'cella-feedback' }, cellaFeedback)));
+    });
+    // rimette il cursore nel campo che il coach stava scrivendo
+    if (idAttivo) { const a = corpo.querySelector('[data-feedback="' + idAttivo + '"]'); if (a) { a.focus(); a.setSelectionRange(a.value.length, a.value.length); } }
+
+    const daVedere = ESERCIZI.filter(e => (stato.video[e.id] || {}).stato === 'da-vedere').length;
+    const caricati = ESERCIZI.filter(e => stato.video[e.id]).length;
+    $('riepilogo-coach').replaceChildren(
+      daVedere ? crea('span', { class: 'etichetta attesa' }, icona('orologio'), daVedere + ' video da vedere')
+        : caricati ? crea('span', { class: 'etichetta verde' }, icona('spunta'), 'Tutto rivisto')
+        : crea('span', { class: 'etichetta' }, 'In attesa dei video'),
+      crea('span', { class: 'etichetta' }, caricati + ' di ' + ESERCIZI.length + ' caricati'));
+    const conta = $('conta-pake'); conta.hidden = !daVedere; conta.textContent = daVedere;
+  }
+
+  let confermaAzzera = false, timerAzzera;
+  $('azzera').addEventListener('click', async e => {
+    const b = e.currentTarget;
+    if (!confermaAzzera) {
+      confermaAzzera = true; b.textContent = 'Sicuro? Clicca di nuovo per cancellare video e chat';
+      clearTimeout(timerAzzera); timerAzzera = setTimeout(() => { confermaAzzera = false; b.textContent = 'Azzera la prova'; }, 4000);
+      return;
+    }
+    confermaAzzera = false; b.textContent = 'Azzera la prova';
+    await archivioVideo.svuota(); bozze.clear(); inModifica.clear();
+    modifica(s => Object.assign(s, statoIniziale()));
+    avvisa('Prova azzerata');
+  });
+
+  /* ===================== CHAT ===================== */
+  const contati = new Map();   // quanti messaggi c'erano all'ultimo disegno (per animare solo i nuovi)
+  function costruisciChat(box, io, altro) {
+    if (box.dataset.pronta === io) return;
+    box.dataset.pronta = io;
+    const coach = altro === COACH;
+    const avatar = coach ? crea('img', { src: 'img/team/alessandro.jpg', alt: '' }) : crea('span', { class: 'iniziale', 'aria-hidden': 'true' }, 'P');
+    const area = crea('textarea', { rows: 1, placeholder: 'Scrivi un messaggio…', 'aria-label': 'Messaggio per ' + UTENTI[altro].nome });
+    const invia = crea('button', { type: 'submit', class: 'invia', 'aria-label': 'Invia', disabled: true, svg: ICONE.invia });
+    const adatta = () => { area.style.height = 'auto'; area.style.height = Math.min(area.scrollHeight, 140) + 'px'; invia.disabled = !area.value.trim(); };
+    area.addEventListener('input', adatta);
+    area.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); modulo.requestSubmit(); } });
+    const modulo = crea('form', { class: 'chat-scrivi' }, area, invia);
+    modulo.addEventListener('submit', e => {
+      e.preventDefault();
+      const testo = area.value.trim(); if (!testo) return;
+      area.value = ''; adatta();
+      modifica(s => s.messaggi.push({ id: nuovoId(), da: io, testo, il: Date.now() }));
+      area.focus();
+    });
+    box.replaceChildren(
+      crea('div', { class: 'chat-testa' }, avatar,
+        crea('div', null, crea('strong', null, UTENTI[altro].nome),
+          crea('small', null, crea('span', { class: 'pallino' }), coach ? 'Il tuo coach' : 'Cliente · Progetto Autonomia'))),
+      crea('ol', { class: 'messaggi', 'aria-live': 'polite', 'aria-label': 'Messaggi' }),
+      modulo);
+  }
+  function disegnaChat(box, io, altro, stato) {
+    costruisciChat(box, io, altro);
+    const lista = box.querySelector('.messaggi');
+    const vicinoAlFondo = lista.scrollHeight - lista.scrollTop - lista.clientHeight < 80;
+    const prima = contati.get(box.id) ?? stato.messaggi.length;
+    lista.replaceChildren();
+    if (!stato.messaggi.length) lista.append(crea('li', { class: 'chat-vuota' }, 'Nessun messaggio. Scrivi tu per primo!'));
+    stato.messaggi.forEach((m, i) => {
+      const classi = ['msg', m.tipo === 'evento' ? 'evento' : (m.da === io ? 'mio' : ''), i >= prima ? 'nuovo' : ''].filter(Boolean).join(' ');
+      lista.append(crea('li', { class: classi },
+        crea('div', { class: 'fumetto' }, m.testo),
+        crea('time', { datetime: new Date(m.il).toISOString() }, formattaOra(m.il))));
+    });
+    const ultimoMio = stato.messaggi.length > prima && stato.messaggi[stato.messaggi.length - 1].da === io;
+    if (vicinoAlFondo || ultimoMio || !contati.has(box.id)) lista.scrollTop = lista.scrollHeight;
+    contati.set(box.id, stato.messaggi.length);
+  }
+
+  /* ===================== DISEGNO GENERALE ===================== */
+  function disegna() {
+    const nome = sessione.leggi(), utente = UTENTI[nome];
+    const vista = utente ? utente.ruolo : 'login';
+    document.body.dataset.vista = vista;
+    $('vista-login').hidden = vista !== 'login';
+    $('vista-cliente').hidden = vista !== 'cliente';
+    $('vista-coach').hidden = vista !== 'coach';
+    $('orologio').hidden = !!utente;
+    $('utente').hidden = !utente;
+    if (!utente) { contati.clear(); return; }
+    $('utente-nome').textContent = utente.nome;
+    $('utente-ruolo').textContent = '· ' + utente.ruoloTesto;
+    document.title = (vista === 'coach' ? 'Area coach' : 'La tua scheda') + ' | Muoversi con Me';
+    const stato = leggiStato();
+    if (vista === 'cliente') { disegnaCliente(stato); disegnaChat($('chat-cliente'), CLIENTE, COACH, stato); }
+    else { disegnaCoach(stato); disegnaChat($('chat-coach'), COACH, CLIENTE, stato); }
+  }
+
+  // Aggiornamento dal vivo: se in un'altra scheda il cliente carica un video o scrive, questa si aggiorna da sola
+  window.addEventListener('storage', e => { if (e.key === CHIAVE) disegna(); });
+  if (canale) canale.onmessage = () => disegna();
+
+  // Prima apertura: salva i messaggi di benvenuto
+  try { if (!localStorage.getItem(CHIAVE)) salvaStato(statoIniziale()); } catch (e) {}
+  disegna();
+  </script>
+</body>
+</html>

@@ -76,6 +76,10 @@
       white-space: nowrap; transition: background .2s, color .2s; }
     .barra a:hover, .barra button:hover { background: var(--colore-principale); color: var(--colore-scuro); }
     .menu { display: flex; gap: 4px; list-style: none; }
+    /* Area clienti: stessa forma dei pulsanti, con un pallino verde per distinguerla */
+    .barra .voce-clienti::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--colore-principale); margin-right: 8px; vertical-align: middle; transform: translateY(-1px); }
+    .barra .voce-clienti:hover::before { background: var(--colore-scuro); }
     .barra .su { width: 40px; height: 40px; padding: 0; border-radius: 50%; display: grid; place-items: center; font-size: 1.1rem; }
     .barra .apri-menu, .barra .su { display: none; }
     /* Scorrendo, il menu resta aperto come nella prima schermata: compare solo il pulsante "↑" per tornare su */
@@ -307,6 +311,7 @@
       <li><a href="about.html">About me</a></li>
       <li><a href="#autonomia">Progetto Autonomia</a></li>
       <li><a href="#contatti">Contatti</a></li>
+      <li><a href="area-clienti.html" class="voce-clienti">Area clienti</a></li>
     </ul>
   </nav>
 

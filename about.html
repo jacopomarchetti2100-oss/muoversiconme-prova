@@ -65,6 +65,10 @@
       font: 400 .9rem var(--font); text-decoration: none; white-space: nowrap; transition: background .2s, color .2s; }
     .barra a:hover, .barra a.attivo { background: var(--colore-principale); color: var(--sfondo); }
     .barra .su { width: 40px; height: 40px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
+    /* Area clienti: pallino verde per distinguerla dalle altre voci */
+    .barra .voce-clienti::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--colore-principale); margin-right: 8px; vertical-align: middle; transform: translateY(-1px); }
+    .barra .voce-clienti:hover::before { background: var(--sfondo); }
 
     /* ====== 1. ABOUT ME. ====== */
     .storia { padding: 200px 0 110px; }
@@ -204,6 +208,7 @@
     <li><a href="about.html" class="attivo">About me</a></li>
     <li><a href="index.html#autonomia"><span class="lungo">Progetto </span>Autonomia</a></li>
     <li><a href="index.html#contatti">Contatti</a></li>
+    <li><a href="area-clienti.html" class="voce-clienti"><span class="lungo">Area </span>Clienti</a></li>
   </ul>
 
   <!-- ================= 1. ABOUT ME. ================= -->
